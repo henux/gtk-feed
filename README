@@ -2,7 +2,7 @@ gtkfeed README
 
 Copyright (C) Henri Häkkinen
 
-gtkfeed is intended to become a lightweight GTK+ 2.0 RSS/Atom feed reader.
+gtk-feed is intended to become a lightweight GTK+ 2.0 RSS/Atom feed reader.
 It works only as a icon on the window manager's system tray and provides
 feeds through a popup menu.
 

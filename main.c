@@ -48,6 +48,13 @@ on_popup_menu (GtkStatusIcon *icon,
 
 /* Menu event handlers. */
 static void
+on_open_feed (GtkMenuItem *item,
+         gpointer     user_data)
+{
+  g_debug ("on_open_feed -- not implemented\n");
+}
+
+static void
 on_check_feeds (GtkMenuItem *item,
                 gpointer     user_data)
 {
@@ -92,9 +99,10 @@ create_feed_menu ()
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);
 
-  item = gtk_menu_item_new_with_label ("FOO");
+  item = gtk_menu_item_new_with_label ("Feeds go here...");
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
+  g_signal_connect (item, "activate", G_CALLBACK(on_open_feed), NULL);
 
   gtk_widget_show_all (GTK_WIDGET(menu));
   
