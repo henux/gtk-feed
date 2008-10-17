@@ -180,7 +180,7 @@ main (int argc, char **argv)
   g_assert (app_menu != NULL);
 
   /* Create the system tray icon and connect the signals. */
-  icon = gtk_status_icon_new_from_stock (GTK_STOCK_HOME);
+  icon = gtk_status_icon_new_from_file ("feedicon.png");
   g_assert (icon != NULL);
 
   g_signal_connect (icon, "activate", G_CALLBACK(on_activate), NULL);
