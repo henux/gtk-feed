@@ -1,1 +1,12 @@
-The `feedicon.png` image is taken from http://feedicons.com.
+gtkfeed README
+
+Copyright (C) Henri Häkkinen
+
+gtkfeed is intended to become a lightweight GTK+ 2.0 RSS/Atom feed reader.
+It works only as a icon on the window manager's system tray and provides
+feeds through a popup menu.
+
+The application is very early on it's development and does not yet actually
+provide any feed reading capability at all.
+
+The feed icon image file is taken from http://feedicons.com.
