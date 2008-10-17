@@ -1,0 +1,4 @@
+2008-10-17  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	* main.c: Initial implementations of the system tray and
+	application menu functionality.
