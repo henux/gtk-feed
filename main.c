@@ -17,45 +17,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtk/gtk.h>
 
-/* Structures. */
-struct MenuPos {
-  gint     x, y;
-  gboolean push_in;
-};
-
 /* Menu objects. */
-static GtkMenu *rss_menu = NULL;
+static GtkMenu *feed_menu = NULL;
 static GtkMenu *app_menu = NULL;
-
-/* Callbacks. */
-static void
-menu_pos_func (GtkMenu  *menu,
-               gint     *x,
-               gint     *y,
-               gboolean *push_in,
-               gpointer  user_data)
-{
-  struct MenuPos *pos = (struct MenuPos *) user_data;
-  g_assert (pos != NULL);
-  *x = pos->x;
-  *y = pos->y;
-  *push_in = pos->push_in;
-}
 
 /* Icon event handlers. */
 static void
 on_activate (GtkStatusIcon *icon,
              gpointer       user_data)
 {
-  struct MenuPos pos;
-  guint32 time;
-
   g_assert (icon != NULL);
-  g_assert (rss_menu != NULL);
+  g_assert (feed_menu != NULL);
 
-  gtk_status_icon_position_menu (rss_menu, &pos.x, &pos.y, &pos.push_in, icon);  
-  time = gtk_get_current_event_time ();
-  gtk_menu_popup (rss_menu, NULL, NULL, menu_pos_func, &pos, 0, time);
+  gtk_menu_popup (feed_menu, NULL, NULL, gtk_status_icon_position_menu,
+                  icon, 0, gtk_get_current_event_time ());
 }
 
 static void
@@ -64,21 +39,26 @@ on_popup_menu (GtkStatusIcon *icon,
                guint          activate_time,
                gpointer       user_data)
 {
-  struct MenuPos pos;
-
   g_assert (icon != NULL);
   g_assert (app_menu != NULL);
   
-  gtk_status_icon_position_menu (app_menu, &pos.x, &pos.y, &pos.push_in, icon);  
-  gtk_menu_popup (app_menu, NULL, NULL, menu_pos_func, &pos, button, activate_time);
+  gtk_menu_popup (app_menu, NULL, NULL, gtk_status_icon_position_menu,
+                  icon, button, activate_time);
 }
 
 /* Menu event handlers. */
 static void
-on_reload_feeds (GtkMenuItem *item,
-                 gpointer     user_data)
+on_check_feeds (GtkMenuItem *item,
+                gpointer     user_data)
 {
-  g_debug ("on_reload_feeds -- not implemented\n");
+  g_debug ("on_check_feeds -- not implemented\n");
+}
+
+static void
+on_add_feed (GtkMenuItem *item,
+             gpointer     user_data)
+{
+  g_debug ("on_add_feed -- not implemented\n");
 }
 
 static void
@@ -104,7 +84,7 @@ on_quit (GtkMenuItem *item,
 
 /* Helper functions. */
 static GtkMenu *
-create_rss_menu ()
+create_feed_menu ()
 {
   GtkMenuShell *menu;
   GtkWidget *item;
@@ -130,10 +110,15 @@ create_app_menu ()
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);
 
-  item = gtk_menu_item_new_with_mnemonic ("_Reload feeds");
+  item = gtk_menu_item_new_with_mnemonic ("_Check feeds");
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
-  g_signal_connect (item, "activate", G_CALLBACK(on_reload_feeds), NULL);
+  g_signal_connect (item, "activate", G_CALLBACK(on_check_feeds), NULL);
+
+  item = gtk_menu_item_new_with_mnemonic ("_Add feed");
+  g_assert (item != NULL);
+  gtk_menu_shell_append (menu, item);
+  g_signal_connect (item, "activate", G_CALLBACK(on_add_feed), NULL);
 
   item = gtk_separator_menu_item_new ();
   g_assert (item != NULL);
@@ -173,8 +158,8 @@ main (int argc, char **argv)
   gtk_init (&argc, &argv);
 
   /* Create the menu objects.  */
-  rss_menu = create_rss_menu ();
-  g_assert (rss_menu != NULL);
+  feed_menu = create_feed_menu ();
+  g_assert (feed_menu != NULL);
 
   app_menu = create_app_menu ();
   g_assert (app_menu != NULL);
