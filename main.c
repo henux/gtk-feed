@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2008 Henri Hakkinen
+Copyright (C) 2008 Henri Häkkinen
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ on_popup_menu (GtkStatusIcon *icon,
 {
   g_assert (icon != NULL);
   g_assert (app_menu != NULL);
-  
+
   gtk_menu_popup (app_menu, NULL, NULL, gtk_status_icon_position_menu,
                   icon, button, activate_time);
 }
@@ -49,7 +49,7 @@ on_popup_menu (GtkStatusIcon *icon,
 /* Menu event handlers. */
 static void
 on_open_feed (GtkMenuItem *item,
-         gpointer     user_data)
+              gpointer     user_data)
 {
   g_debug ("on_open_feed -- not implemented\n");
 }
@@ -105,7 +105,7 @@ create_feed_menu ()
   g_signal_connect (item, "activate", G_CALLBACK(on_open_feed), NULL);
 
   gtk_widget_show_all (GTK_WIDGET(menu));
-  
+
   return GTK_MENU(menu);
 }
 
@@ -152,7 +152,7 @@ create_app_menu ()
   g_signal_connect (item, "activate", G_CALLBACK(on_quit), NULL);
 
   gtk_widget_show_all (GTK_WIDGET(menu));
-  
+
   return GTK_MENU(menu);
 }
 
