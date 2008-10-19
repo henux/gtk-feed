@@ -1,4 +1,4 @@
-2009-10-19  Henri Häkkinen  <henux@users.sourceforge.net>
+2008-10-19  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* rssfeed.c: Rewrote the parser to use libxml2.
 

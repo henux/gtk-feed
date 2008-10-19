@@ -52,7 +52,7 @@ parse_channel (xmlNodePtr root, RSSFeed *feed)
       feed->desc = g_strdup ((const gchar *) xmlNodeGetContent (node));
     } else if (xmlStrcmp (node->name, (const xmlChar *) "item") == 0) {
       RSSFeedItem *item;
-      item = g_new0 (RSSFeedItem, 0);
+      item = g_new0 (RSSFeedItem, 1);
       g_assert (item != NULL);
       feed->items = g_list_append (feed->items, item);
       parse_item (root, item);
