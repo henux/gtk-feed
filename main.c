@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <gtk/gtk.h>
+#include "rssfeed.h"
 
 /* Menu objects. */
 static GtkMenu *feed_menu = NULL;
@@ -47,25 +48,13 @@ on_popup_menu (GtkStatusIcon *icon,
 }
 
 /* Menu event handlers. */
-static void
-on_open_feed (GtkMenuItem *item,
-              gpointer     user_data)
-{
-  g_debug ("on_open_feed -- not implemented\n");
-}
-
-static void
-on_check_feeds (GtkMenuItem *item,
-                gpointer     user_data)
-{
-  g_debug ("on_check_feeds -- not implemented\n");
-}
-
-static void
-on_add_feed (GtkMenuItem *item,
+void
+on_open_url (GtkMenuItem *item,
              gpointer     user_data)
 {
-  g_debug ("on_add_feed -- not implemented\n");
+  const gchar *uri = (const gchar *) user_data;
+  g_assert (uri != NULL);
+  g_print ("%s\n", uri);
 }
 
 static void
@@ -73,13 +62,6 @@ on_about (GtkMenuItem *item,
           gpointer     user_data)
 {
   g_debug ("on_about -- not implemented\n");
-}
-
-static void
-on_prefs (GtkMenuItem *item,
-          gpointer     user_data)
-{
-  g_debug ("on_prefs -- not implemented\n");
 }
 
 static void
@@ -93,19 +75,65 @@ on_quit (GtkMenuItem *item,
 static GtkMenu *
 create_feed_menu ()
 {
+  gchar        *feeds_file;
+  FILE         *fp;
   GtkMenuShell *menu;
-  GtkWidget *item;
+
+  /* Read URIs from the config and build the menu. */
+  feeds_file = g_build_filename (g_get_user_config_dir (),
+                                 "gtk-feed", "feeds", NULL);
+  g_assert (feeds_file != NULL);
+
+  fp = fopen (feeds_file, "r");
+  if (fp == NULL) {
+    g_critical ("%s not found", feeds_file);
+    g_free (feeds_file);
+    return NULL;
+  }
 
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);
 
-  item = gtk_menu_item_new_with_label ("Feeds go here...");
+  while (1) {
+    char       uri[100];
+    GtkWidget *item;
+
+    /* Read an URI from the file and strip whitespaces. */
+    if (fgets (uri, 100, fp) == NULL)
+      break;
+    g_strstrip (uri);
+
+    /* Parse the feed and create a menu item representing it */
+    g_debug ("Loading %s...\n", uri);
+    item = parse_rss_feed (uri);
+    if (item == NULL) {
+      g_critical ("failed to parse %s", uri);
+    } else {
+      gtk_menu_shell_append (menu, item);      
+    }
+  }
+
+  g_debug ("All feeds parsed.");
+  fclose (fp);
+  g_free (feeds_file);
+
+  return GTK_MENU(menu);
+}
+
+static GtkMenu *
+create_default_feed_menu ()
+{
+  GtkMenuShell *menu;
+  GtkWidget    *item;
+
+  /* Create the default feeds menu, when there is no user feeds file.  */
+  menu = GTK_MENU_SHELL(gtk_menu_new ());
+  g_assert (menu != NULL);
+
+  item = gtk_image_menu_item_new_with_label ("No feeds loaded");
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
-  g_signal_connect (item, "activate", G_CALLBACK(on_open_feed), NULL);
-
-  gtk_widget_show_all (GTK_WIDGET(menu));
-
+  
   return GTK_MENU(menu);
 }
 
@@ -118,40 +146,15 @@ create_app_menu ()
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);
 
-  item = gtk_menu_item_new_with_mnemonic ("_Check feeds");
-  g_assert (item != NULL);
-  gtk_menu_shell_append (menu, item);
-  g_signal_connect (item, "activate", G_CALLBACK(on_check_feeds), NULL);
-
-  item = gtk_menu_item_new_with_mnemonic ("_Add feed");
-  g_assert (item != NULL);
-  gtk_menu_shell_append (menu, item);
-  g_signal_connect (item, "activate", G_CALLBACK(on_add_feed), NULL);
-
-  item = gtk_separator_menu_item_new ();
-  g_assert (item != NULL);
-  gtk_menu_shell_append (menu, item);
-
   item = gtk_image_menu_item_new_from_stock (GTK_STOCK_ABOUT, NULL);
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
   g_signal_connect (item, "activate", G_CALLBACK(on_about), NULL);
 
-  item = gtk_image_menu_item_new_from_stock (GTK_STOCK_PREFERENCES, NULL);
-  g_assert (item != NULL);
-  gtk_menu_shell_append (menu, item);
-  g_signal_connect (item, "activate", G_CALLBACK(on_prefs), NULL);
-
-  item = gtk_separator_menu_item_new ();
-  g_assert (item != NULL);
-  gtk_menu_shell_append (menu, item);
-
   item = gtk_image_menu_item_new_from_stock (GTK_STOCK_QUIT, NULL);
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
   g_signal_connect (item, "activate", G_CALLBACK(on_quit), NULL);
-
-  gtk_widget_show_all (GTK_WIDGET(menu));
 
   return GTK_MENU(menu);
 }
@@ -167,10 +170,15 @@ main (int argc, char **argv)
 
   /* Create the menu objects.  */
   feed_menu = create_feed_menu ();
+  if (feed_menu == NULL) {
+    feed_menu = create_default_feed_menu ();
+  }
   g_assert (feed_menu != NULL);
+  gtk_widget_show_all (GTK_WIDGET(feed_menu));
 
   app_menu = create_app_menu ();
   g_assert (app_menu != NULL);
+  gtk_widget_show_all (GTK_WIDGET(app_menu));
 
   /* Create the system tray icon and connect the signals. */
   icon = gtk_status_icon_new_from_file ("feedicon.png");

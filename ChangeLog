@@ -1,6 +1,9 @@
 2008-10-19  Henri Häkkinen  <henux@users.sourceforge.net>
 
-	* rssfeed.c: Rewrote the parser to use libxml2.
+	* rssfeed.c: Rewrote the parser to use libxml2.  Changed to create
+	menu from the feed.
+	* main.c (create_feed_menu): Constructs the feed menu from the
+	feed XML at the program startup.
 
 2008-10-18  Henri Häkkinen  <henux@users.sourceforge.net>
 

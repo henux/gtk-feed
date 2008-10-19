@@ -18,23 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef RSSFEED_H
 #define RSSFEED_H
 
-#include <glib.h>
+/*
+ * Parses a RSS feed from the given web resource and constructs a
+ * corresponding menu hierarchy from it.
+ */
 
-typedef struct {
-  gchar *title;
-  gchar *link;
-  gchar *desc;
-} RSSFeedItem;
-
-typedef struct {
-  gchar *title;
-  gchar *link;
-  gchar *desc;
-  GList *items;
-} RSSFeed;
-
-RSSFeed * rss_feed_new   ();
-void      rss_feed_free  (RSSFeed *feed);
-gboolean  rss_feed_parse (RSSFeed *feed, const gchar *uri);
+GtkWidget * parse_rss_feed (const gchar *uri);
 
 #endif
