@@ -1,3 +1,7 @@
+2009-10-19  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	* rssfeed.c: Rewrote the parser to use libxml2.
+
 2008-10-18  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* rssfeed.c: Initial implementation of RSS feed parser.

@@ -12,332 +12,118 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 */
 
-#include <glib.h>
-#include <string.h>
 #include "rssfeed.h"
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
-/* Parser structure declarations. */
-static GMarkupParser item_title_parser;
-static GMarkupParser item_link_parser;
-static GMarkupParser item_description_parser;
-
-static GMarkupParser channel_title_parser;
-static GMarkupParser channel_link_parser;
-static GMarkupParser channel_description_parser;
-
-static GMarkupParser item_parser;
-static GMarkupParser channel_parser;
-static GMarkupParser rss_parser;
-
-/* Subparser event handlers. */
+/* Parser functions. */
 static void
-item_title_text (GMarkupParseContext *context,
-                 const gchar         *text,
-                 gsize                text_len,
-                 gpointer             user_data,
-                 GError             **error)
+parse_item (xmlNodePtr root, RSSFeedItem *item)
 {
-  RSSFeedItem *item = (RSSFeedItem *) user_data;
-  g_assert (item != NULL);
-  item->title = g_string_append_len (item->title, text, text_len);
-}
-
-static void
-item_link_text (GMarkupParseContext *context,
-                const gchar         *text,
-                gsize                text_len,
-                gpointer             user_data,
-                GError             **error)
-{
-  RSSFeedItem *item = (RSSFeedItem *) user_data;
-  g_assert (item != NULL);
-  item->link = g_string_append_len (item->link, text, text_len);
-}
-
-static void
-item_description_text (GMarkupParseContext *context,
-                       const gchar         *text,
-                       gsize                text_len,
-                       gpointer             user_data,
-                       GError             **error)
-{
-  RSSFeedItem *item = (RSSFeedItem *) user_data;
-  g_assert (item != NULL);
-  item->desc = g_string_append_len (item->desc, text, text_len);
-}
-
-static void
-channel_title_text (GMarkupParseContext *context,
-                    const gchar         *text,
-                    gsize                text_len,
-                    gpointer             user_data,
-                    GError             **error)
-{
-  RSSFeed *feed = (RSSFeed *) user_data;
-  g_assert (feed != NULL);
-  feed->title = g_string_append_len (feed->title, text, text_len);
-}
-
-static void
-channel_link_text (GMarkupParseContext *context,
-                   const gchar         *text,
-                   gsize                text_len,
-                   gpointer             user_data,
-                   GError             **error)
-{
-  RSSFeed *feed = (RSSFeed *) user_data;
-  g_assert (feed != NULL);
-  feed->link = g_string_append_len (feed->link, text, text_len);
-}
-
-static void
-channel_description_text (GMarkupParseContext *context,
-                          const gchar         *text,
-                          gsize                text_len,
-                          gpointer             user_data,
-                          GError             **error)
-{
-  RSSFeed *feed = (RSSFeed *) user_data;
-  g_assert (feed != NULL);
-  feed->desc = g_string_append_len (feed->desc, text, text_len);
-}
-
-static void
-item_start_element (GMarkupParseContext *context,
-                    const gchar         *element_name,
-                    const gchar        **attrib_names,
-                    const gchar        **attrib_values,
-                    gpointer             user_data,
-                    GError             **error)
-{
-  if (strcmp (element_name, "title") == 0) {
-    g_markup_parse_context_push (context, &item_title_parser, NULL);
-  } else if (strcmp (element_name, "link") == 0) {
-    g_markup_parse_context_push (context, &item_link_parser, NULL);
-  } else if (strcmp (element_name, "description") == 0) {
-    g_markup_parse_context_push (context, &item_description_parser, NULL);
-  }
-}
-
-static void
-item_end_element (GMarkupParseContext *context,
-                  const gchar         *element_name,
-                  gpointer             user_data,
-                  GError             **error)
-{
-  if (strcmp (element_name, "title") == 0 ||
-      strcmp (element_name, "link") == 0 ||
-      strcmp (element_name, "description") == 0)
-    {
-      g_markup_parse_context_pop (context);
+  xmlNodePtr node;
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
+      item->title = g_strdup ((const gchar *) xmlNodeGetContent (node));
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
+      item->link = g_strdup ((const gchar *) xmlNodeGetContent (node));
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "description") == 0) {
+      item->desc = g_strdup ((const gchar *) xmlNodeGetContent (node));
     }
-}
-
-static void
-channel_start_element (GMarkupParseContext *context,
-                       const gchar         *element_name,
-                       const gchar        **attrib_names,
-                       const gchar        **attrib_values,
-                       gpointer             user_data,
-                       GError             **error)
-{
-  if (strcmp (element_name, "title") == 0) {
-    g_markup_parse_context_push (context, &channel_title_parser, NULL);
-  } else if (strcmp (element_name, "link") == 0) {
-    g_markup_parse_context_push (context, &channel_link_parser, NULL);
-  } else if (strcmp (element_name, "description") == 0) {
-    g_markup_parse_context_push (context, &channel_description_parser, NULL);
-  } else if (strcmp (element_name, "item") == 0) {
-    g_markup_parse_context_push (context, &item_parser, NULL);
   }
 }
 
 static void
-channel_end_element (GMarkupParseContext *context,
-                     const gchar         *element_name,
-                     gpointer             user_data,
-                     GError             **error)
+parse_channel (xmlNodePtr root, RSSFeed *feed)
 {
-  if (strcmp (element_name, "title") == 0 ||
-      strcmp (element_name, "link") == 0 ||
-      strcmp (element_name, "description") == 0 ||
-      strcmp (element_name, "item") == 0)
-    {
-      g_markup_parse_context_pop (context);
+  xmlNodePtr node;
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
+      feed->title = g_strdup ((const gchar *) xmlNodeGetContent (node));
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
+      feed->link = g_strdup ((const gchar *) xmlNodeGetContent (node));
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "description") == 0) {
+      feed->desc = g_strdup ((const gchar *) xmlNodeGetContent (node));
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "item") == 0) {
+      RSSFeedItem *item;
+      item = g_new0 (RSSFeedItem, 0);
+      g_assert (item != NULL);
+      feed->items = g_list_append (feed->items, item);
+      parse_item (root, item);
     }
-}
-
-static void
-rss_start_element (GMarkupParseContext *context,
-                   const gchar         *element_name,
-                   const gchar        **attrib_names,
-                   const gchar        **attrib_values,
-                   gpointer             user_data,
-                   GError             **error)
-{
-  if (strcmp (element_name, "channel") == 0) {
-    g_markup_parse_context_push (context, &channel_parser, NULL);
   }
 }
 
 static void
-rss_end_element (GMarkupParseContext *context,
-                 const gchar         *element_name,
-                 gpointer             user_data,
-                 GError             **error)
+parse_rss (xmlNodePtr root, RSSFeed *feed)
 {
-  if (strcmp (element_name, "channel") == 0) {
-    g_markup_parse_context_pop (context);
+  xmlNodePtr node;
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "channel") == 0) {
+      parse_channel (node, feed);
+      break;
+    }
   }
 }
-
-static void
-main_start_element (GMarkupParseContext *context,
-                    const gchar         *element_name,
-                    const gchar        **attrib_names,
-                    const gchar        **attrib_values,
-                    gpointer             user_data,
-                    GError             **error)
-{
-  if (strcmp (element_name, "rss") == 0) {
-    g_markup_parse_context_push (context, &rss_parser, NULL);
-  }
-}
-
-static void
-main_end_element (GMarkupParseContext *context,
-                  const gchar         *element_name,
-                  gpointer             user_data,
-                  GError             **error)
-{
-  if (strcmp (element_name, "rss") == 0) {
-    g_markup_parse_context_pop (context);
-  }
-}
-
-/* Subparser structures definitions. */
-static GMarkupParser item_title_parser = {
-  NULL, NULL, item_title_text, NULL, NULL
-};
-
-static GMarkupParser item_link_parser = {
-  NULL, NULL, item_link_text, NULL, NULL
-};
-
-static GMarkupParser item_description_parser = {
-  NULL, NULL, item_description_text, NULL, NULL
-};
-
-static GMarkupParser channel_title_parser = {
-  NULL, NULL, channel_title_text, NULL, NULL
-};
-
-static GMarkupParser channel_link_parser = {
-  NULL, NULL, channel_link_text, NULL, NULL
-};
-
-static GMarkupParser channel_description_parser = {
-  NULL, NULL, channel_description_text, NULL, NULL
-};
-
-static GMarkupParser item_parser = {
-  item_start_element, item_end_element, NULL, NULL, NULL
-};
-
-static GMarkupParser channel_parser = {
-  channel_start_element, channel_end_element, NULL, NULL, NULL
-};
-
-static GMarkupParser rss_parser = {
-  rss_start_element, rss_end_element, NULL, NULL, NULL
-};
-
-static GMarkupParser main_parser = {
-  main_start_element, main_end_element, NULL, NULL, NULL
-};
 
 /* RSS feed parser front-end. */
 RSSFeed *
 rss_feed_new ()
 {
-  RSSFeed *rss;
-
-  rss = g_new (RSSFeed, 1);
-  g_assert (rss != NULL);
-
-  rss->title = g_string_sized_new (20);
-  rss->link  = g_string_sized_new (20);
-  rss->desc  = g_string_sized_new (20);
-  rss->items = NULL;
-
-  return rss;
+  RSSFeed *feed;
+  feed = g_new0 (RSSFeed, 1);
+  g_assert (feed != NULL);
+  return feed;
 }
 
 void
-rss_feed_free (RSSFeed *rss)
+rss_feed_free (RSSFeed *feed)
 {
   GList *node;
-
-  g_assert (rss != NULL);
-
-  g_string_free (rss->title, TRUE);
-  g_string_free (rss->link, TRUE);
-  g_string_free (rss->desc, TRUE);
-
-  for (node = rss->items; node != NULL; node = node->next) {
+  g_assert (feed != NULL);
+  g_free (feed->title);
+  g_free (feed->link);
+  g_free (feed->desc);
+  for (node = feed->items; node != NULL; node = g_list_next (node)) {
     RSSFeedItem *item = (RSSFeedItem *) node->data;
-    g_string_free (item->title, TRUE);
-    g_string_free (item->link, TRUE);
-    g_string_free (item->desc, TRUE);
-    g_free (item);
+    g_assert (item != NULL);
+    g_free (item->title);
+    g_free (item->link);
+    g_free (item->desc);
   }
-
-  g_free (rss);
-}
-
-void
-rss_feed_clear (RSSFeed *rss)
-{
-  GList *node;
-
-  g_assert (rss != NULL);
-
-  g_string_free (rss->title, TRUE);
-  g_string_free (rss->link, TRUE);
-  g_string_free (rss->desc, TRUE);
-
-  for (node = rss->items; node != NULL; node = node->next) {
-    RSSFeedItem *item = (RSSFeedItem *) node->data;
-    g_string_free (item->title, TRUE);
-    g_string_free (item->link, TRUE);
-    g_string_free (item->desc, TRUE);
-    g_free (item);
-  }
-
-  rss->title = g_string_sized_new (20);
-  rss->link  = g_string_sized_new (20);
-  rss->desc  = g_string_sized_new (20);
-  rss->items = NULL;
+  g_free (feed);
 }
 
 gboolean
-rss_feed_parse (RSSFeed     *rss,
-                const gchar *text,
-                gsize        len)
+rss_feed_parse (RSSFeed     *feed,
+                const gchar *uri)
 {
-  GMarkupParseContext *context;
-  gboolean result;
+  xmlDocPtr doc;
+  xmlNodePtr node;
 
-  g_assert (rss != NULL);
+  doc = xmlReadFile (uri, NULL, 0);
+  if (doc == NULL)
+    return FALSE;
 
-  context = g_markup_parse_context_new (&main_parser, 0, rss, NULL);
-  g_assert (context != NULL);
+  node = xmlDocGetRootElement (doc);
+  for (; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "rss") == 0) {
+      parse_rss (node, feed);
+      break;
+    }
+  }
 
-  result = g_markup_parse_context_parse (context, text, len, NULL);
-  g_markup_parse_context_free (context);
+  xmlFreeDoc (doc);
 
-  return result;
+  return TRUE;
 }

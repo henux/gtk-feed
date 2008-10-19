@@ -1,8 +1,10 @@
-gtkfeed TODO
+gtk-feed TODO
 
- - RSS and Atom feed parsers.
+ - Feeds menu implementation.
 
- - Prefereces dialog and ability to add, remove and organize feeds.
+ - Atom feed parser.
+
+ - Preferences dialog and ability to add, remove and organize feeds.
 
  - GNU build system files.
 
