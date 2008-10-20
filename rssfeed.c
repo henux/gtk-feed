@@ -23,13 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void on_open_url (GtkMenuItem *, gpointer);
 
 /* Parser functions. */
-static GtkWidget *
-parse_item_element (xmlNodePtr root)
+static void
+parse_item_element (xmlNodePtr  root,
+                    GtkWidget  *menu)
 {
   xmlNodePtr  node;
   GtkWidget  *item;
-  gchar      *title = NULL;
-  gchar      *link = NULL;
+  xmlChar    *title = NULL;
+  xmlChar    *link = NULL;
 
   g_assert (root != NULL);
 
@@ -38,73 +39,65 @@ parse_item_element (xmlNodePtr root)
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
       /* Item title. */
-      g_free (title);
-      title = g_strdup ((const gchar *) xmlNodeGetContent (node));
-      g_strstrip (title);
+      title = xmlNodeGetContent (node);
     } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
       /* Item link. */
-      g_free (link);
-      link = g_strdup ((const gchar *) xmlNodeGetContent (node));
-      g_strstrip (link);
+      link = xmlNodeGetContent (node);
     }
   }
 
-  g_assert (title != NULL);
-  g_assert (link != NULL);
-  
-  /* Create the menu item for this feed item. */
-  item = gtk_menu_item_new_with_label (title);
-  g_assert (item != NULL);  
-  g_signal_connect (item, "activate", G_CALLBACK(on_open_url), link);
-
-  g_free (title);
-  
-  return item;
+  if (title == NULL) {
+    g_critical ("<item> element doesn't have <title> element");
+  } else if (link == NULL) {
+    g_critical ("<item> element doesn't have <link> element");
+  } else {  
+    g_strstrip ((gchar *) title);
+    item = gtk_menu_item_new_with_label ((const gchar *) title);
+    g_assert (item != NULL);
+    gtk_widget_show (item);
+    gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
+    g_signal_connect (item, "activate", G_CALLBACK(on_open_url),
+                      g_strdup ((const gchar *) link));
+  }
 }
 
-static GtkWidget *
-parse_channel_element (xmlNodePtr root)
+static void
+parse_channel_element (xmlNodePtr   root,
+                       GtkMenuItem *submenu)
 {
   xmlNodePtr  node;
   GtkWidget  *menu;
-  GtkWidget  *submenu;
-  gchar      *title = NULL;
+  xmlChar    *title = NULL;
   
   g_assert (root != NULL);
 
-  submenu = gtk_menu_new ();
-  g_assert (submenu != NULL);
+  menu = gtk_menu_new ();
+  g_assert (menu != NULL);
+  gtk_menu_item_set_submenu (submenu, menu);
+  gtk_widget_show (menu);
 
   for (node = root->children; node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
       /* Channel title. */
-      g_free (title);
-      title = g_strdup ((const gchar *) xmlNodeGetContent (node));
+      title = xmlNodeGetContent (node);
     } else if (xmlStrcmp (node->name, (const xmlChar *) "item") == 0) {
       /* Channel item. */
-      GtkWidget *subitem;
-      subitem = parse_item_element (node);
-      g_assert (subitem != NULL);
-      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), subitem);
+      parse_item_element (node, menu);
     }
   }
 
-  g_assert (title != NULL);
-
-  /* Create a menu item for this feed. */
-  menu = gtk_menu_item_new_with_label (title);
-  g_assert (menu != NULL);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu), submenu);
-
-  g_free (title);
-  
-  return menu;
+  if (title == NULL) {
+    g_critical ("<channel> element doesn't have <title> element");
+  } else {
+    /* TODO: change the title of the menu item */
+  }
 }
 
-static GtkWidget *
-parse_rss_element (xmlNodePtr root)
+static void
+parse_rss_element (xmlNodePtr   root,
+                   GtkMenuItem *submenu)
 {
   xmlNodePtr node;
 
@@ -114,41 +107,63 @@ parse_rss_element (xmlNodePtr root)
     if (node->type != XML_ELEMENT_NODE) {
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "channel") == 0) {
-      return parse_channel_element (node);
+      parse_channel_element (node, submenu);
+      return;
     }
   }
 
-  return NULL;
+  g_critical ("<channel> element not found");
 }
 
-/* RSS feed parser front-end. */
-GtkWidget *
-parse_rss_feed (const gchar *uri)
+static void
+parse_doc (xmlDocPtr    doc,
+           GtkMenuItem *submenu)
 {
-  xmlDocPtr   doc;
-  xmlNodePtr  node;
-  GtkWidget  *menu = NULL;
-  
-  g_assert (uri != NULL);
+  xmlNodePtr node;
 
-  /* Parse the XML file into DOM tree. */
-  doc = xmlReadFile (uri, NULL, 0);
-  if (doc == NULL)
-    return NULL;
+  g_assert (doc != NULL);
 
-  /* Process the DOM tree. */
-  node = xmlDocGetRootElement (doc);
-  for (; node != NULL; node = node->next) {
+  for (node = xmlDocGetRootElement (doc); node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "rss") == 0) {
-      menu = parse_rss_element (node);
-      break;
+      parse_rss_element (node, submenu);
+      return;
     }
+  }  
+
+  g_critical ("<rss> element not found");
+}
+
+gpointer
+rss_feed_parser (gpointer data)
+{
+  RSSFeedParser *parser;
+  xmlDocPtr      doc;
+  
+  parser = (RSSFeedParser *) data;
+  g_assert (parser != NULL);
+  g_assert (parser->feed_uri != NULL);
+  g_assert (parser->submenu != NULL);
+
+  g_debug ("rss_feed_parser started for %s", parser->feed_uri);
+  
+  /* Parse the XML file into DOM tree. */
+  doc = xmlReadFile (parser->feed_uri, NULL, 0);
+  if (doc == NULL) {
+    g_warning ("couldn't read %s", parser->feed_uri);
+    goto cleanup;
   }
 
-  /* Cleanup. */
-  xmlFreeDoc (doc);
+  /* Process the DOM tree. */
+  parse_doc (doc, parser->submenu);
+  g_debug ("rss_feed_parser finished for %s", parser->feed_uri);
 
-  return menu;
+  /* Cleanup. */
+ cleanup:
+  xmlFreeDoc (doc);
+  g_free (parser->feed_uri);
+  g_free (parser);
+  
+  return NULL;
 }

@@ -1,10 +1,8 @@
 gtk-feed TODO
 
- - Feeds menu implementation.
-
  - Atom feed parser.
 
- - Preferences dialog and ability to add, remove and organize feeds.
+ - Preferences dialog and an ability to add, remove and organize feeds.
 
  - GNU build system files.
 

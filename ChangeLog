@@ -1,3 +1,8 @@
+2008-10-20  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	* rssfeed.c (rss_feed_parser): The feed parser now works in a
+	background thread.
+
 2008-10-19  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* rssfeed.c: Rewrote the parser to use libxml2.  Changed to create

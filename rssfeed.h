@@ -19,10 +19,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RSSFEED_H
 
 /*
- * Parses a RSS feed from the given web resource and constructs a
- * corresponding menu hierarchy from it.
+ * RSS Feed Parser:
+ *
+ * The RSS feed parser works in a background thread.  Each RSS feed is read
+ * by it's own thread; thus there will be an equal amount of parser threads
+ * as there are feeds to read.
+ *
+ * Each parser gets a feed URI to locate the RSS XML file from and a
+ * sub-menu item to put the feed links into.  The parser renames the menu
+ * item once it knows the proper title of the feed and builds a submenu
+ * under it, where each item in this submenu corresponds to a single feed
+ * article.
+ *
+ * Once the whole feed is read and processed, the background thread frees
+ * all necessary resources and exists cleanly.
  */
 
-GtkWidget * parse_rss_feed (const gchar *uri);
+typedef struct {
+  gchar       *feed_uri;
+  GtkMenuItem *submenu;
+} RSSFeedParser;
+
+gpointer rss_feed_parser (gpointer data);
 
 #endif
