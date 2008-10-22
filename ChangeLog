@@ -4,6 +4,7 @@
 	* rssfeed.c (on_open_url): Opens URLs using 'xdg-open'.
 	* rssfeed.c (parse_channel_element): Changes the title of the menu
 	item according to the RSS feed's title.
+	* src/Makefile.am: Added common.h and rssfeed.h to _SOURCES.
 	Added GNU build system files.
 	Version 0.1.
 
