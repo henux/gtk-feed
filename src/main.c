@@ -63,7 +63,7 @@ static void
 on_about (GtkMenuItem *item,
           gpointer     user_data)
 {
-  g_debug ("on_about -- not implemented");
+  show_about_box ();
 }
 
 static void
@@ -75,16 +75,12 @@ on_quit (GtkMenuItem *item,
 
 /* Helper functions. */
 static GtkMenu *
-create_feed_menu ()
+create_feed_menu (const char *feeds_file)
 {
-  gchar        *feeds_file;
   FILE         *fp;
   GtkMenuShell *menu;
 
   /* Read URIs from the config and build the menu. */
-  feeds_file = get_config_filename ("feeds");
-  g_assert (feeds_file != NULL);
-
   fp = fopen (feeds_file, "r");
   if (fp == NULL) {
     g_critical ("%s not found", feeds_file);
@@ -106,7 +102,12 @@ create_feed_menu ()
       break;
     g_strstrip (uri);
 
-    /* Create a dummy menu item for this feed. */
+    /* If the line starts with # or is empty, skip it. */
+    if (uri[0] == '#' || uri[0] == '\0')
+      continue;
+
+    /* Create a dummy menu item for this feed.  The label will be renamed
+       by the RSS feed parser. */
     item = gtk_menu_item_new_with_label ("Feed");
     g_assert (item != NULL);
     gtk_menu_shell_append (menu, item);
@@ -125,8 +126,6 @@ create_feed_menu ()
   }
 
   fclose (fp);
-  g_free (feeds_file);
-
   gtk_widget_show (GTK_WIDGET(menu));
 
   return GTK_MENU(menu);
@@ -160,7 +159,9 @@ create_app_menu ()
 int
 main (int argc, char **argv)
 {
-  gchar         *icon_file;
+  gchar         *icon_14x14_file;
+  gchar         *icon_28x28_file;
+  gchar         *feed_file;
   GtkStatusIcon *icon;
 
   /* Initialize GTK and other libraries. */
@@ -168,21 +169,36 @@ main (int argc, char **argv)
   gdk_threads_init ();
   gtk_init (&argc, &argv);
 
-  /* Create the menu objects.  */
-  feed_menu = create_feed_menu ();
-  g_assert (feed_menu != NULL);
+  /* General application initialization. */
+  g_set_application_name ("GTK Feed Reader");
+  
+  /* Build filenames. */
+  icon_14x14_file = get_pixmap_filename ("feed-icon-14x14.png");
+  icon_28x28_file = get_pixmap_filename ("feed-icon-28x28.png");
+  feed_file = get_config_filename ("feeds");
 
+  /* Load icon pixbufs. */
+  icon_14x14 = gdk_pixbuf_new_from_file (icon_14x14_file, NULL);
+  icon_28x28 = gdk_pixbuf_new_from_file (icon_28x28_file, NULL);
+
+  if (icon_14x14 == NULL)
+    g_critical ("couldn't open pixbuf from file %s", icon_14x14_file);
+  if (icon_28x28 == NULL)
+    g_critical ("coulnd't open pixbuf from file %s", icon_28x28_file);
+  
+  /* Create the menu objects.  */
+  feed_menu = create_feed_menu (feed_file);
   app_menu = create_app_menu ();
-  g_assert (app_menu != NULL);
 
   /* Create the system tray icon and connect the signals. */
-  icon_file = get_pixmap_filename ("feed-icon-14x14.png");
-  icon = gtk_status_icon_new_from_file (icon_file);
-  g_assert (icon != NULL);
-  g_free (icon_file);
-
+  icon = gtk_status_icon_new_from_pixbuf (icon_14x14);
   g_signal_connect (icon, "activate", G_CALLBACK(on_activate), NULL);
   g_signal_connect (icon, "popup-menu", G_CALLBACK(on_popup_menu), NULL);
+
+  /* Free the filenames. */
+  g_free (icon_14x14_file);
+  g_free (icon_28x28_file);
+  g_free (feed_file);
 
   /* Run the main loop. */
   gtk_main ();

@@ -20,14 +20,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <glib.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "common.h"
+
+GdkPixbuf *icon_14x14 = NULL;
+GdkPixbuf *icon_28x28 = NULL;
 
 /* Returns a filename to the pixmaps directory.  The caller is responsible
    of free'ing the returned string.  */
 gchar *
 get_pixmap_filename (const gchar *filename)
 {
-  return g_build_filename (PIXMAPDIR, filename, NULL);
+  gchar *fn = g_build_filename (DATADIR, PACKAGE_NAME, "pixmaps", filename, NULL);
+  g_assert (fn != NULL);
+  g_debug ("opening pixmap file from %s", fn);
+  return fn;
 }
 
 /* Returns a filename to the user's config directory.  The caller is
@@ -35,7 +43,10 @@ get_pixmap_filename (const gchar *filename)
 gchar *
 get_config_filename (const gchar *filename)
 {
-  return g_build_filename (g_get_user_config_dir (),
-                           PACKAGE_NAME, filename, NULL);
+  gchar *fn = g_build_filename (g_get_user_config_dir (),
+                                PACKAGE_NAME, filename, NULL);
+  g_assert (fn != NULL);
+  g_debug ("opening config file from %s", fn);
+  return fn;
 }
 

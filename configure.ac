@@ -23,7 +23,7 @@ AM_MAINTAINER_MODE
 AM_PROG_CC_C_O
 
 # Checks for libraries.
-AM_PATH_GTK_2_0([2.2.0],,AC_MSG_ERROR([gtk-feed needs GTK+ 2.2.0]),[gthread])
+AM_PATH_GTK_2_0([2.4.0],,AC_MSG_ERROR([gtk-feed needs GTK+ 2.4.0]),[gthread])
 AM_PATH_XML2([2.6.0],,AC_MSG_ERROR([gtk-feed needs libxml 2.6.0]))
 
 # Checks for header files.

@@ -1,6 +1,7 @@
 2008-10-22  Henri Häkkinen  <henux@users.sourceforge.net>
 
-	GNU build system files.
+	Added GNU build system files.
+	* about.c (show_about_box): Added about box functionality.
 
 2008-10-20  Henri Häkkinen  <henux@users.sourceforge.net>
 

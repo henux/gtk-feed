@@ -15,13 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef ABOUT_H
+#define ABOUT_H
 
-extern GdkPixbuf *icon_14x14;
-extern GdkPixbuf *icon_28x28;
-
-gchar * get_pixmap_filename (const gchar *filename);
-gchar * get_config_filename (const gchar *filename);
+void show_about_box ();
 
 #endif
