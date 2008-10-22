@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef COMMON_H
 #define COMMON_H
 
-extern GdkPixbuf *icon_14x14;
-extern GdkPixbuf *icon_28x28;
+extern GdkPixbuf *icon_16x16;
+extern GdkPixbuf *icon_48x48;
 
 gchar * get_pixmap_filename (const gchar *filename);
 gchar * get_config_filename (const gchar *filename);

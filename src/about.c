@@ -47,7 +47,7 @@ show_about_box ()
                          "comments", "A lightweight GTK+ 2.0 RSS feed reader.",
                          "copyright", "Copyright (C) 2008 Henri Häkkinen",
                          "license", license,
-                         "logo", icon_28x28,
+                         "logo", icon_48x48,
                          "version", PACKAGE_VERSION,
                          "wrap-license", TRUE,
                          NULL);

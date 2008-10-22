@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
 
-GdkPixbuf *icon_14x14 = NULL;
-GdkPixbuf *icon_28x28 = NULL;
+GdkPixbuf *icon_16x16 = NULL;
+GdkPixbuf *icon_48x48 = NULL;
 
 /* Returns a filename to the pixmaps directory.  The caller is responsible
    of free'ing the returned string.  */

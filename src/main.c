@@ -159,8 +159,8 @@ create_app_menu ()
 int
 main (int argc, char **argv)
 {
-  gchar         *icon_14x14_file;
-  gchar         *icon_28x28_file;
+  gchar         *icon_16x16_file;
+  gchar         *icon_48x48_file;
   gchar         *feed_file;
   GtkStatusIcon *icon;
 
@@ -173,31 +173,31 @@ main (int argc, char **argv)
   g_set_application_name ("GTK Feed Reader");
   
   /* Build filenames. */
-  icon_14x14_file = get_pixmap_filename ("feed-icon-14x14.png");
-  icon_28x28_file = get_pixmap_filename ("feed-icon-28x28.png");
+  icon_16x16_file = get_pixmap_filename ("feed-icon-16x16.png");
+  icon_48x48_file = get_pixmap_filename ("feed-icon-48x48.png");
   feed_file = get_config_filename ("feeds");
 
   /* Load icon pixbufs. */
-  icon_14x14 = gdk_pixbuf_new_from_file (icon_14x14_file, NULL);
-  icon_28x28 = gdk_pixbuf_new_from_file (icon_28x28_file, NULL);
+  icon_16x16 = gdk_pixbuf_new_from_file (icon_16x16_file, NULL);
+  icon_48x48 = gdk_pixbuf_new_from_file (icon_48x48_file, NULL);
 
-  if (icon_14x14 == NULL)
-    g_critical ("couldn't open pixbuf from file %s", icon_14x14_file);
-  if (icon_28x28 == NULL)
-    g_critical ("coulnd't open pixbuf from file %s", icon_28x28_file);
+  if (icon_16x16 == NULL)
+    g_critical ("couldn't open pixbuf from file %s", icon_16x16_file);
+  if (icon_48x48 == NULL)
+    g_critical ("coulnd't open pixbuf from file %s", icon_48x48_file);
   
   /* Create the menu objects.  */
   feed_menu = create_feed_menu (feed_file);
   app_menu = create_app_menu ();
 
   /* Create the system tray icon and connect the signals. */
-  icon = gtk_status_icon_new_from_pixbuf (icon_14x14);
+  icon = gtk_status_icon_new_from_pixbuf (icon_16x16);
   g_signal_connect (icon, "activate", G_CALLBACK(on_activate), NULL);
   g_signal_connect (icon, "popup-menu", G_CALLBACK(on_popup_menu), NULL);
 
   /* Free the filenames. */
-  g_free (icon_14x14_file);
-  g_free (icon_28x28_file);
+  g_free (icon_16x16_file);
+  g_free (icon_48x48_file);
   g_free (feed_file);
 
   /* Run the main loop. */
