@@ -24,15 +24,8 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 
 # Checks for libraries.
-PKG_CHECK_MODULES([GLIB], [gthread-2.0 >= 2.0])
-AC_SUBST([GLIB_CFLAGS])
-AC_SUBST([GLIB_LIBS])
-PKG_CHECK_MODULES([GTK2], [gtk+-2.0 >= 2.0])
-AC_SUBST([GTK2_CFLAGS])
-AC_SUBST([GTK2_LIBS])
-PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.0])
-AC_SUBST([XML2_CFLAGS])
-AC_SUBST([XML2_LIBS])
+AM_PATH_GTK_2_0(,,,[gthread])
+AM_PATH_XML2
 
 # Checks for header files.
 # Checks for typedefs, structures, and compiler characteristics.

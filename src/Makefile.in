@@ -47,8 +47,7 @@ am_gtk_feed_OBJECTS = gtk_feed-main.$(OBJEXT) \
 	gtk_feed-rssfeed.$(OBJEXT)
 gtk_feed_OBJECTS = $(am_gtk_feed_OBJECTS)
 am__DEPENDENCIES_1 =
-gtk_feed_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+gtk_feed_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 gtk_feed_LINK = $(CCLD) $(gtk_feed_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -80,10 +79,8 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
-GLIB_CFLAGS = @GLIB_CFLAGS@
-GLIB_LIBS = @GLIB_LIBS@
-GTK2_CFLAGS = @GTK2_CFLAGS@
-GTK2_LIBS = @GTK2_LIBS@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -109,8 +106,9 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
-XML2_CFLAGS = @XML2_CFLAGS@
-XML2_LIBS = @XML2_LIBS@
+XML2_CONFIG = @XML2_CONFIG@
+XML_CPPFLAGS = @XML_CPPFLAGS@
+XML_LIBS = @XML_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -154,8 +152,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 gtk_feed_SOURCES = main.c rssfeed.c
-gtk_feed_CFLAGS = $(GLIB_CFLAGS) $(GTK2_CFLAGS) $(XML2_CFLAGS)
-gtk_feed_LDADD = $(GLIB_LIBS) $(GTK2_LIBS) $(XML2_LIBS)
+gtk_feed_CPPFLAGS = $(XML_CPPFLAGS)
+gtk_feed_CFLAGS = $(GTK_CFLAGS)
+gtk_feed_LDADD = $(GTK_LIBS) $(XML_LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -240,32 +239,32 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 gtk_feed-main.o: main.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-main.o -MD -MP -MF $(DEPDIR)/gtk_feed-main.Tpo -c -o gtk_feed-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-main.o -MD -MP -MF $(DEPDIR)/gtk_feed-main.Tpo -c -o gtk_feed-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/gtk_feed-main.Tpo $(DEPDIR)/gtk_feed-main.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='main.c' object='gtk_feed-main.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
 
 gtk_feed-main.obj: main.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-main.obj -MD -MP -MF $(DEPDIR)/gtk_feed-main.Tpo -c -o gtk_feed-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-main.obj -MD -MP -MF $(DEPDIR)/gtk_feed-main.Tpo -c -o gtk_feed-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/gtk_feed-main.Tpo $(DEPDIR)/gtk_feed-main.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='main.c' object='gtk_feed-main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
 
 gtk_feed-rssfeed.o: rssfeed.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-rssfeed.o -MD -MP -MF $(DEPDIR)/gtk_feed-rssfeed.Tpo -c -o gtk_feed-rssfeed.o `test -f 'rssfeed.c' || echo '$(srcdir)/'`rssfeed.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-rssfeed.o -MD -MP -MF $(DEPDIR)/gtk_feed-rssfeed.Tpo -c -o gtk_feed-rssfeed.o `test -f 'rssfeed.c' || echo '$(srcdir)/'`rssfeed.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/gtk_feed-rssfeed.Tpo $(DEPDIR)/gtk_feed-rssfeed.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rssfeed.c' object='gtk_feed-rssfeed.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-rssfeed.o `test -f 'rssfeed.c' || echo '$(srcdir)/'`rssfeed.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-rssfeed.o `test -f 'rssfeed.c' || echo '$(srcdir)/'`rssfeed.c
 
 gtk_feed-rssfeed.obj: rssfeed.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-rssfeed.obj -MD -MP -MF $(DEPDIR)/gtk_feed-rssfeed.Tpo -c -o gtk_feed-rssfeed.obj `if test -f 'rssfeed.c'; then $(CYGPATH_W) 'rssfeed.c'; else $(CYGPATH_W) '$(srcdir)/rssfeed.c'; fi`
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -MT gtk_feed-rssfeed.obj -MD -MP -MF $(DEPDIR)/gtk_feed-rssfeed.Tpo -c -o gtk_feed-rssfeed.obj `if test -f 'rssfeed.c'; then $(CYGPATH_W) 'rssfeed.c'; else $(CYGPATH_W) '$(srcdir)/rssfeed.c'; fi`
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/gtk_feed-rssfeed.Tpo $(DEPDIR)/gtk_feed-rssfeed.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rssfeed.c' object='gtk_feed-rssfeed.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-rssfeed.obj `if test -f 'rssfeed.c'; then $(CYGPATH_W) 'rssfeed.c'; else $(CYGPATH_W) '$(srcdir)/rssfeed.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(gtk_feed_CPPFLAGS) $(CPPFLAGS) $(gtk_feed_CFLAGS) $(CFLAGS) -c -o gtk_feed-rssfeed.obj `if test -f 'rssfeed.c'; then $(CYGPATH_W) 'rssfeed.c'; else $(CYGPATH_W) '$(srcdir)/rssfeed.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
