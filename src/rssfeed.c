@@ -15,12 +15,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 */
 
-#include <gtk/gtk.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <gtk/gtkmenu.h>
+#include <gtk/gtkmenuitem.h>
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+
+#include "common.h"
 #include "rssfeed.h"
 
-void on_open_url (GtkMenuItem *, gpointer);
+static void
+on_open_url (GtkMenuItem *item,
+             gpointer     user_data)
+{
+  const gchar *uri = (const gchar *) user_data;
+  g_assert (uri != NULL);
+  g_print ("%s\n", uri);
+}
+
 
 /* Parser functions. */
 static void
@@ -50,14 +66,22 @@ parse_item_element (xmlNodePtr  root,
     g_critical ("<item> element doesn't have <title> element");
   } else if (link == NULL) {
     g_critical ("<item> element doesn't have <link> element");
-  } else {  
+  } else {
+    /* Create the menu item for the feed article. */
+
+    gdk_threads_enter ();
+
     g_strstrip ((gchar *) title);
     item = gtk_menu_item_new_with_label ((const gchar *) title);
     g_assert (item != NULL);
-    gtk_widget_show (item);
+
     gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
     g_signal_connect (item, "activate", G_CALLBACK(on_open_url),
                       g_strdup ((const gchar *) link));
+
+    gtk_widget_show (item);
+
+    gdk_threads_leave ();
   }
 }
 
@@ -71,10 +95,15 @@ parse_channel_element (xmlNodePtr   root,
   
   g_assert (root != NULL);
 
+  /* Create the submenu for this feed channel. */
+  gdk_threads_enter ();
+
   menu = gtk_menu_new ();
   g_assert (menu != NULL);
   gtk_menu_item_set_submenu (submenu, menu);
   gtk_widget_show (menu);
+
+  gdk_threads_leave ();
 
   for (node = root->children; node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {

@@ -15,8 +15,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#include <gtk/gtk.h>
+#endif
+
+#include <gtk/gtkmain.h>
+#include <gtk/gtkmenu.h>
+#include <gtk/gtkmenuitem.h>
+#include <gtk/gtkimagemenuitem.h>
+#include <gtk/gtkstatusicon.h>
+#include <gtk/gtkstock.h>
+
+#include "common.h"
 #include "rssfeed.h"
 
 /* Menu objects. */
@@ -49,15 +59,6 @@ on_popup_menu (GtkStatusIcon *icon,
 }
 
 /* Menu event handlers. */
-void
-on_open_url (GtkMenuItem *item,
-             gpointer     user_data)
-{
-  const gchar *uri = (const gchar *) user_data;
-  g_assert (uri != NULL);
-  g_print ("%s\n", uri);
-}
-
 static void
 on_about (GtkMenuItem *item,
           gpointer     user_data)
@@ -73,15 +74,6 @@ on_quit (GtkMenuItem *item,
 }
 
 /* Helper functions. */
-static gchar *
-get_config_filename (const gchar *filename)
-{
-  gchar *name;
-  name = g_build_filename (g_get_user_config_dir (),
-                           PACKAGE_NAME, "feeds", NULL);
-  return name;
-}
-
 static GtkMenu *
 create_feed_menu ()
 {
@@ -168,11 +160,13 @@ create_app_menu ()
 int
 main (int argc, char **argv)
 {
+  gchar         *icon_file;
   GtkStatusIcon *icon;
 
   /* Initialize GTK and other libraries. */
-  gtk_init (&argc, &argv);
   g_thread_init (NULL);
+  gdk_threads_init ();
+  gtk_init (&argc, &argv);
 
   /* Create the menu objects.  */
   feed_menu = create_feed_menu ();
@@ -182,8 +176,10 @@ main (int argc, char **argv)
   g_assert (app_menu != NULL);
 
   /* Create the system tray icon and connect the signals. */
-  icon = gtk_status_icon_new_from_file ("feedicon.png");
+  icon_file = get_pixmap_filename ("feed-icon-14x14.png");
+  icon = gtk_status_icon_new_from_file (icon_file);
   g_assert (icon != NULL);
+  g_free (icon_file);
 
   g_signal_connect (icon, "activate", G_CALLBACK(on_activate), NULL);
   g_signal_connect (icon, "popup-menu", G_CALLBACK(on_popup_menu), NULL);
