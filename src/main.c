@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <config.h>
 #include <gtk/gtk.h>
 #include "rssfeed.h"
 
@@ -72,6 +73,15 @@ on_quit (GtkMenuItem *item,
 }
 
 /* Helper functions. */
+static gchar *
+get_config_filename (const gchar *filename)
+{
+  gchar *name;
+  name = g_build_filename (g_get_user_config_dir (),
+                           PACKAGE_NAME, "feeds", NULL);
+  return name;
+}
+
 static GtkMenu *
 create_feed_menu ()
 {
@@ -80,8 +90,7 @@ create_feed_menu ()
   GtkMenuShell *menu;
 
   /* Read URIs from the config and build the menu. */
-  feeds_file = g_build_filename (g_get_user_config_dir (),
-                                 "gtk-feed", "feeds", NULL);
+  feeds_file = get_config_filename ("feeds");
   g_assert (feeds_file != NULL);
 
   fp = fopen (feeds_file, "r");
@@ -125,6 +134,7 @@ create_feed_menu ()
 
   fclose (fp);
   g_free (feeds_file);
+
   gtk_widget_show (GTK_WIDGET(menu));
 
   return GTK_MENU(menu);
@@ -134,7 +144,7 @@ static GtkMenu *
 create_app_menu ()
 {
   GtkMenuShell *menu;
-  GtkWidget *item;
+  GtkWidget    *item;
 
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);

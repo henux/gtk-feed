@@ -1,3 +1,7 @@
+2008-10-22  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	GNU build system files.
+
 2008-10-20  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* rssfeed.c (rss_feed_parser): The feed parser now works in a
