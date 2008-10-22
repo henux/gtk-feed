@@ -1,30 +1,28 @@
-gtk-feed 0.1 README
+gtk-feed 0.1.1 README
 
 Copyright (C) 2008 Henri Häkkinen
 
 gtk-feed is a lightweight and minimal GTK+ 2.0 RSS feed reader.  It works
 only as an icon on the window manager's system tray and provides feeds
-through a popup menu.
-
-The project is very early on it's development and much needs to be done.
-The current version contains only a basic RSS feed support and not much
-else.
+through a popup menu. The project is very early on it's development and
+much needs to be done.  The current version contains only a basic RSS feed
+support and not much else.
 
 The program reads the `feeds' file from your `$XDG_CONFIG_HOME/gtk-feed'
 directory (which usually corresponds to `~/.config/gtk-feed').  This file
-should contain URLs to XML RSS feed resources, one URL at each line.  Blank
-lines and lines beginning with '#' are ignored.  For example to sign up for
-the news feed from the GNU Project, add this to your feeds file:
+should contain URLs to XML RSS feed resources, one URL on each line.  Blank
+lines and lines beginning with '#' are ignored.  For example to sign up to
+a news feed for the GNU Project, add this to your feeds file:
 
     http://www.gnu.org/rss/whatsnew.rss
 
-At this moment, there is no easier way to sign up for news feeds than to
-manually scramble through feed URLs :/
+At this moment, there is no easier way to do this other than to manually
+scramble through feed URLs :/
 
-Articles for the signed up feeds are available from the left click popup
-menu on the system tray icon.  Clicking on a feed article opens the URL
-using your web browser.  At the moment, opening URLs is done by using
-`xdg-open' utility so you will need to have that installed on your system.
+Feed articles are accessible from the system tray icon's left click popup
+menu.  Clicking on a feed article opens the URL using your web browser.
+This is done by using the `xdg-open' utility so you will need to have that
+installed on your system.
 
 Thanks for Jani Mettovaara for giving me the idea for this project.
 

@@ -1,3 +1,15 @@
+
+gtk-feed 0.1.1
+==============
+
+Minor fixes
+
+    * Corrected spelling errors in README and TODO.
+    * Included autogen.sh script.
+    * Included link to the project's website to the about box.
+    * Included missing copyright notices to few files.
+
+
 gtk-feed 0.1
 ============
 

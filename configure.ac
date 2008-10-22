@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 2008 Henri Häkkinen
+# Copyright (C) 2008 Henri Häkkinen.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([gtk-feed], [0.1], [henux@users.sourceforge.net])
+AC_INIT([gtk-feed], [0.1.1], [henux@users.sourceforge.net])
+AC_COPYRIGHT([Copyright (C) 2008 Henri Häkkinen.])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AM_MAINTAINER_MODE
 

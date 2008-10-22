@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2008 Henri Häkkinen
+Copyright (C) 2008 Henri Häkkinen.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -50,5 +50,6 @@ show_about_box ()
                          "logo", icon_48x48,
                          "version", PACKAGE_VERSION,
                          "wrap-license", TRUE,
+                         "website", "http://henux.nor.fi/15-gtk/24-gtk-feed",
                          NULL);
 }

@@ -1,11 +1,12 @@
-gtk-feed TODO
+gtk-feed 0.1.1 TODO
 
+ - Internationalization.
  - Atom feed parser.
- - Easier way to sign up for feeds.
+ - Easier way to sign up to feeds.
  - Manual page and user manual.
- - Ability to reparse the feeds file while gtk-feed is running.
+ - Ability to reload feeds file while gtk-feed is running.
  - Ability to organize feeds into subcategories.
  - Configuration to allow URLs be opened by other means than xdg-open.
- - Automatic reloading of feeds at specified time intervals.
+ - Automatic reloading of feeds at regular time intervals.
 
 And much more...
