@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtk/gtkmenu.h>
 #include <gtk/gtkmenuitem.h>
+#include <gtk/gtklabel.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -32,11 +33,21 @@ static void
 on_open_url (GtkMenuItem *item,
              gpointer     user_data)
 {
-  const gchar *uri = (const gchar *) user_data;
-  g_assert (uri != NULL);
-  g_print ("%s\n", uri);
-}
+  gchar *command;
+  const gchar *url = (const gchar *) user_data;
+  g_assert (url != NULL);
 
+  g_debug ("opening %s using xdg-open", url);
+
+  command = g_strjoin (" ", "xdg-open", url, NULL);
+  g_assert (command != NULL);
+
+  if (!g_spawn_command_line_async (command, NULL)) {
+    g_critical ("failed to run '%s'", command);
+  }
+
+  g_free (command);
+}
 
 /* Parser functions. */
 static void
@@ -120,7 +131,13 @@ parse_channel_element (xmlNodePtr   root,
   if (title == NULL) {
     g_critical ("<channel> element doesn't have <title> element");
   } else {
-    /* TODO: change the title of the menu item */
+    /* Change the submenu label according to the feed title. */
+    GtkWidget *label;
+
+    gdk_threads_enter ();
+    label = gtk_bin_get_child (GTK_BIN(submenu));
+    gtk_label_set_text (GTK_LABEL(label), title);
+    gdk_threads_leave ();
   }
 }
 

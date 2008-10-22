@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([gtk-feed], [0.0], [henux@users.sourceforge.net])
+AC_INIT([gtk-feed], [0.1], [henux@users.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AM_MAINTAINER_MODE
 
@@ -23,8 +23,8 @@ AM_MAINTAINER_MODE
 AM_PROG_CC_C_O
 
 # Checks for libraries.
-AM_PATH_GTK_2_0([2.4.0],,AC_MSG_ERROR([gtk-feed needs GTK+ 2.4.0]),[gthread])
-AM_PATH_XML2([2.6.0],,AC_MSG_ERROR([gtk-feed needs libxml 2.6.0]))
+AM_PATH_GTK_2_0([2.4.0],,AC_MSG_ERROR([at least gtk+ 2.4.0 is required]),[gthread])
+AM_PATH_XML2([2.6.0],,AC_MSG_ERROR([at least libxml 2.6.0 is required]))
 
 # Checks for header files.
 # Checks for typedefs, structures, and compiler characteristics.

@@ -1,4 +1,4 @@
-gtk-feed README
+gtk-feed 0.1 README
 
 Copyright (C) 2008 Henri Häkkinen
 
@@ -6,12 +6,27 @@ gtk-feed is a lightweight and minimal GTK+ 2.0 RSS feed reader.  It works
 only as an icon on the window manager's system tray and provides feeds
 through a popup menu.
 
-The application is very early on it's development cycle and is not yet
-ready for general use.  A rudimentary support for RSS feeds is implemented
-but the application needs much more attention before it can be considered
-usable.
+The project is very early on it's development and much needs to be done.
+The current version contains only a basic RSS feed support and not much
+else.
+
+The program reads the `feeds' file from your `$XDG_CONFIG_HOME/gtk-feed'
+directory (which usually corresponds to `~/.config/gtk-feed').  This file
+should contain URLs to XML RSS feed resources, one URL at each line.  Blank
+lines and lines beginning with '#' are ignored.  For example to sign up for
+the news feed from the GNU Project, add this to your feeds file:
+
+    http://www.gnu.org/rss/whatsnew.rss
+
+At this moment, there is no easier way to sign up for news feeds than to
+manually scramble through feed URLs :/
+
+Articles for the signed up feeds are available from the left click popup
+menu on the system tray icon.  Clicking on a feed article opens the URL
+using your web browser.  At the moment, opening URLs is done by using
+`xdg-open' utility so you will need to have that installed on your system.
 
 Thanks for Jani Mettovaara for giving me the idea for this project.
 
-The feed icon image is taken from http://feedicons.com and it is released
-as "public domain".
+The feed icon images distributed along with this project are taken from
+http://feedicons.com and they are released as "public domain".

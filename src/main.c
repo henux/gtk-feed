@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtkmenu.h>
 #include <gtk/gtkmenuitem.h>
 #include <gtk/gtkimagemenuitem.h>
+#include <gtk/gtklabel.h>
 #include <gtk/gtkstatusicon.h>
 #include <gtk/gtkstock.h>
 
@@ -79,12 +80,12 @@ create_feed_menu (const char *feeds_file)
 {
   FILE         *fp;
   GtkMenuShell *menu;
+  gsize         feeds_num = 0;
 
   /* Read URIs from the config and build the menu. */
   fp = fopen (feeds_file, "r");
   if (fp == NULL) {
     g_critical ("%s not found", feeds_file);
-    g_free (feeds_file);
     return NULL;
   }
 
@@ -93,7 +94,7 @@ create_feed_menu (const char *feeds_file)
 
   while (1) {
     char           uri[100];
-    GtkWidget     *item;
+    GtkWidget     *label, *item;
     RSSFeedParser *parser;
     GThread       *thread;
 
@@ -108,8 +109,12 @@ create_feed_menu (const char *feeds_file)
 
     /* Create a dummy menu item for this feed.  The label will be renamed
        by the RSS feed parser. */
-    item = gtk_menu_item_new_with_label ("Feed");
-    g_assert (item != NULL);
+    label = gtk_label_new (NULL);
+    gtk_label_set_markup (GTK_LABEL(label), "<span style='italic'>Loading...</span>");
+
+    item = gtk_menu_item_new ();
+    gtk_container_add (GTK_CONTAINER(item), label);
+
     gtk_menu_shell_append (menu, item);
     gtk_widget_show (item);
     
@@ -123,10 +128,24 @@ create_feed_menu (const char *feeds_file)
     if (thread == NULL) {
       g_critical ("failed to create a thread to read %s", uri);
     }
+
+    ++feeds_num;
   }
 
+  if (feeds_num == 0) {
+    GtkWidget *label, *item;
+
+    label = gtk_label_new (NULL);
+    gtk_label_set_markup (GTK_LABEL(label), "<span style='italic'>No feeds loaded.</span>");
+
+    item = gtk_menu_item_new ();
+    gtk_container_add (GTK_CONTAINER(item), label);
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
+  }
+  
   fclose (fp);
-  gtk_widget_show (GTK_WIDGET(menu));
+  gtk_widget_show_all (GTK_WIDGET(menu));
 
   return GTK_MENU(menu);
 }
