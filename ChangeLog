@@ -1,3 +1,10 @@
+2008-10-23  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	* about.c (show_about_box): Fixed the website URL.
+	* rssfeed.c: Shows errors on the menu for invalid feeds.
+	Rewrote the debug and error messages.
+	Version 0.1.2.
+
 2008-10-22  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* about.c (show_about_box): Added about box functionality.
@@ -6,7 +13,7 @@
 	item according to the RSS feed's title.
 	* src/Makefile.am: Added common.h and rssfeed.h to _SOURCES.
 	Added GNU build system files.
-	Version 0.1.
+	Versions 0.1 and 0.1.1.
 
 2008-10-20  Henri Häkkinen  <henux@users.sourceforge.net>
 

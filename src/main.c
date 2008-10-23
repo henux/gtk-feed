@@ -85,7 +85,7 @@ create_feed_menu (const char *feeds_file)
   /* Read URIs from the config and build the menu. */
   fp = fopen (feeds_file, "r");
   if (fp == NULL) {
-    g_critical ("%s not found", feeds_file);
+    g_critical ("Couldn't open file %s.", feeds_file);
     return NULL;
   }
 
@@ -126,7 +126,7 @@ create_feed_menu (const char *feeds_file)
 
     thread = g_thread_create (rss_feed_parser, parser, FALSE, NULL);
     if (thread == NULL) {
-      g_critical ("failed to create a thread to read %s", uri);
+      g_critical ("Failed to spawn a thread for %s.", uri);
     }
 
     ++feeds_num;
@@ -201,9 +201,9 @@ main (int argc, char **argv)
   icon_48x48 = gdk_pixbuf_new_from_file (icon_48x48_file, NULL);
 
   if (icon_16x16 == NULL)
-    g_critical ("couldn't open pixbuf from file %s", icon_16x16_file);
+    g_critical ("Couldn't open pixbuf from file %s.", icon_16x16_file);
   if (icon_48x48 == NULL)
-    g_critical ("coulnd't open pixbuf from file %s", icon_48x48_file);
+    g_critical ("Coulnd't open pixbuf from file %s.", icon_48x48_file);
   
   /* Create the menu objects.  */
   feed_menu = create_feed_menu (feed_file);

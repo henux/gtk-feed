@@ -32,10 +32,8 @@ GdkPixbuf *icon_48x48 = NULL;
 gchar *
 get_pixmap_filename (const gchar *filename)
 {
-  gchar *fn = g_build_filename (DATADIR, PACKAGE_NAME, "pixmaps", filename, NULL);
-  g_assert (fn != NULL);
-  g_debug ("opening pixmap file from %s", fn);
-  return fn;
+  return g_build_filename (DATADIR, PACKAGE_NAME, "pixmaps",
+                           filename, NULL);
 }
 
 /* Returns a filename to the user's config directory.  The caller is
@@ -43,10 +41,7 @@ get_pixmap_filename (const gchar *filename)
 gchar *
 get_config_filename (const gchar *filename)
 {
-  gchar *fn = g_build_filename (g_get_user_config_dir (),
-                                PACKAGE_NAME, filename, NULL);
-  g_assert (fn != NULL);
-  g_debug ("opening config file from %s", fn);
-  return fn;
+  return g_build_filename (g_get_user_config_dir (), PACKAGE_NAME,
+                           filename, NULL);
 }
 

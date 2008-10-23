@@ -50,6 +50,6 @@ show_about_box ()
                          "logo", icon_48x48,
                          "version", PACKAGE_VERSION,
                          "wrap-license", TRUE,
-                         "website", "http://henux.nor.fi/15-gtk/24-gtk-feed",
+                         "website", "http://henux.nor.fi/coding/projects/15-gtk/24-gtk-feed",
                          NULL);
 }

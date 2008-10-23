@@ -37,16 +37,57 @@ on_open_url (GtkMenuItem *item,
   const gchar *url = (const gchar *) user_data;
   g_assert (url != NULL);
 
-  g_debug ("opening %s using xdg-open", url);
+  g_debug ("Opening URL %s by using `xdg-open'.", url);
 
   command = g_strjoin (" ", "xdg-open", url, NULL);
   g_assert (command != NULL);
 
   if (!g_spawn_command_line_async (command, NULL)) {
-    g_critical ("failed to run '%s'", command);
+    g_critical ("Failed to run `%s'.", command);
   }
 
   g_free (command);
+}
+
+static void
+set_menu_title (GtkMenuItem *item,
+                const gchar *title)
+{
+  GtkWidget *label;
+
+  g_assert (item != NULL);
+  g_assert (title != NULL);
+
+  gdk_threads_enter ();
+
+  label = gtk_bin_get_child (GTK_BIN(item));
+  g_assert (label != NULL);
+  gtk_label_set_text (GTK_LABEL(label), title);
+
+  gdk_threads_leave ();
+}
+
+static void
+set_menu_title_italic (GtkMenuItem *item,
+                       const gchar *title)
+{
+  GtkWidget *label;
+  gchar     *markup;
+
+  g_assert (item != NULL);
+  g_assert (title != NULL);
+
+  gdk_threads_enter ();
+
+  markup = g_strdup_printf ("<span style='italic'>%s</span>", title);
+
+  label = gtk_bin_get_child (GTK_BIN(item));
+  g_assert (label != NULL);
+
+  gtk_label_set_markup (GTK_LABEL(label), markup);
+  g_free (markup);
+
+  gdk_threads_leave ();
 }
 
 /* Parser functions. */
@@ -74,9 +115,9 @@ parse_item_element (xmlNodePtr  root,
   }
 
   if (title == NULL) {
-    g_critical ("<item> element doesn't have <title> element");
+    g_critical ("<item> element doesn't have <title> element.");
   } else if (link == NULL) {
-    g_critical ("<item> element doesn't have <link> element");
+    g_critical ("<item> element doesn't have <link> element.");
   } else {
     /* Create the menu item for the feed article. */
 
@@ -129,15 +170,10 @@ parse_channel_element (xmlNodePtr   root,
   }
 
   if (title == NULL) {
-    g_critical ("<channel> element doesn't have <title> element");
+    set_menu_title_italic (submenu, "Invalid RSS feed");
+    g_critical ("<channel> element doesn't have <title> element.");
   } else {
-    /* Change the submenu label according to the feed title. */
-    GtkWidget *label;
-
-    gdk_threads_enter ();
-    label = gtk_bin_get_child (GTK_BIN(submenu));
-    gtk_label_set_text (GTK_LABEL(label), title);
-    gdk_threads_leave ();
+    set_menu_title (submenu, title);
   }
 }
 
@@ -158,7 +194,8 @@ parse_rss_element (xmlNodePtr   root,
     }
   }
 
-  g_critical ("<channel> element not found");
+  set_menu_title_italic (submenu, "Invalid RSS feed");
+  g_critical ("<channel> element not found.");
 }
 
 static void
@@ -178,7 +215,8 @@ parse_doc (xmlDocPtr    doc,
     }
   }  
 
-  g_critical ("<rss> element not found");
+  set_menu_title_italic (submenu, "Invalid RSS feed");
+  g_critical ("<rssl> element not found.");
 }
 
 gpointer
@@ -192,18 +230,19 @@ rss_feed_parser (gpointer data)
   g_assert (parser->feed_uri != NULL);
   g_assert (parser->submenu != NULL);
 
-  g_debug ("rss_feed_parser started for %s", parser->feed_uri);
+  g_debug ("Started reading %s.", parser->feed_uri);
   
   /* Parse the XML file into DOM tree. */
   doc = xmlReadFile (parser->feed_uri, NULL, 0);
   if (doc == NULL) {
-    g_warning ("couldn't read %s", parser->feed_uri);
+    set_menu_title_italic (parser->submenu, "Invalid feed URL");
+    g_warning ("Couldn't read %s.", parser->feed_uri);
     goto cleanup;
   }
 
   /* Process the DOM tree. */
   parse_doc (doc, parser->submenu);
-  g_debug ("rss_feed_parser finished for %s", parser->feed_uri);
+  g_debug ("Finished reading %s.", parser->feed_uri);
 
   /* Cleanup. */
  cleanup:

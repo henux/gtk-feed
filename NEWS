@@ -1,4 +1,17 @@
 
+gtk-feed 0.1.2
+==============
+
+New features
+
+    * Shows errors on the feeds menu for feed read errors.
+
+Minor fixes
+
+    * Fixed the project's website URL in the about box.
+    * Rewrote the debug and error messages into complete sentences.
+
+
 gtk-feed 0.1.1
 ==============
 
