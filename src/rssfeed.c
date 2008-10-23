@@ -230,7 +230,7 @@ rss_feed_parser (gpointer data)
   g_assert (parser->feed_uri != NULL);
   g_assert (parser->submenu != NULL);
 
-  g_debug ("Started reading %s.", parser->feed_uri);
+  g_debug ("Started to read %s.", parser->feed_uri);
   
   /* Parse the XML file into DOM tree. */
   doc = xmlReadFile (parser->feed_uri, NULL, 0);
