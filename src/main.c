@@ -94,7 +94,7 @@ create_feed_menu (const char *feeds_file)
 
   while (1) {
     char           uri[100];
-    GtkWidget     *label, *item;
+    GtkWidget     *label, *item, *submenu;
     RSSFeedParser *parser;
     GThread       *thread;
 
@@ -107,22 +107,27 @@ create_feed_menu (const char *feeds_file)
     if (uri[0] == '#' || uri[0] == '\0')
       continue;
 
-    /* Create a dummy menu item for this feed.  The label will be renamed
-       by the RSS feed parser. */
+    /* Create a dummy menu item and submenu for this feed. */
     label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL(label), "<span style='italic'>Loading...</span>");
+    gtk_label_set_markup (GTK_LABEL(label),
+                          "<span style='italic'>Loading...</span>");
 
     item = gtk_menu_item_new ();
     gtk_container_add (GTK_CONTAINER(item), label);
 
+    submenu = gtk_menu_new ();
+    gtk_menu_item_set_submenu (item, submenu);
+    
     gtk_menu_shell_append (menu, item);
-    gtk_widget_show (item);
+    gtk_widget_show_all (item);
     
     /* Spawn a thread for reading the feed from the URI. */
     parser = g_new (RSSFeedParser, 1);
     g_assert (parser != NULL);
+
     parser->feed_uri = g_strdup (uri);
-    parser->submenu = GTK_MENU_ITEM(item);
+    parser->item = GTK_MENU_ITEM(item);
+    parser->submenu = GTK_MENU(submenu);
 
     thread = g_thread_create (rss_feed_parser, parser, FALSE, NULL);
     if (thread == NULL) {

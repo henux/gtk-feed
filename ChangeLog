@@ -1,5 +1,9 @@
 2008-10-23  Henri Häkkinen  <henux@users.sourceforge.net>
 
+	* common.c (add_menu_item_link): Shows the URL in the tooltip.
+
+2008-10-23  Henri Häkkinen  <henux@users.sourceforge.net>
+
 	* about.c (show_about_box): Fixed the website URL.
 	* rssfeed.c: Shows errors on the menu for invalid feeds.
 	Rewrote the debug and error messages.

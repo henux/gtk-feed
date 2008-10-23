@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
+#include <gtk/gtkmenu.h>
+#include <gtk/gtkmenuitem.h>
+#include <gtk/gtklabel.h>
 #include <gtk/gtkaboutdialog.h>
 
 #include "common.h"

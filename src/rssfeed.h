@@ -25,11 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * by it's own thread; thus there will be an equal amount of parser threads
  * as there are feeds to read.
  *
- * Each parser gets a feed URI to locate the RSS XML file from and a
- * sub-menu item to put the feed links into.  The parser renames the menu
- * item once it knows the proper title of the feed and builds a submenu
- * under it, where each item in this submenu corresponds to a single feed
- * article.
+ * Each parser gets a feed URI to locate the RSS XML file from, a menu item
+ * for the feed corresponding to the one in the feeds menu, and a sub-menu
+ * to build the feed links into.  The parser renames the menu item once it
+ * knows the proper title of the feed and builds a submenu under it, where
+ * each item in this submenu corresponds to a single feed article.
  *
  * Once the whole feed is read and processed, the background thread frees
  * all necessary resources and exists cleanly.
@@ -37,7 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef struct {
   gchar       *feed_uri;
-  GtkMenuItem *submenu;
+  GtkMenuItem *item;
+  GtkMenu     *submenu;
 } RSSFeedParser;
 
 gpointer rss_feed_parser (gpointer data);
