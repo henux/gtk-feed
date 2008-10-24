@@ -9,8 +9,6 @@ gtk-feed TODO
  - Ability to organize feeds into subcategories.
  - Configuration to allow URLs be opened by other means than xdg-open.
  - Automatic reloading of feed URLs at regular time intervals.
- - Feed article's URL could be shown in a tooltip.
- - Command line options.
  - Graphical preferences dialog.
  - Play a sound or displaying a notification when new unread feeds
    are available.

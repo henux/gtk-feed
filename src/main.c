@@ -23,34 +23,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib/gstrfuncs.h>
 
 #include <gtk/gtkmain.h>
-#include <gtk/gtkmenu.h>
-#include <gtk/gtkmenuitem.h>
 #include <gtk/gtkimagemenuitem.h>
 #include <gtk/gtklabel.h>
+#include <gtk/gtkseparatormenuitem.h>
 #include <gtk/gtkstatusicon.h>
 #include <gtk/gtkstock.h>
 
-#include "about.h"
 #include "common.h"
+#include "dialogs.h"
 #include "options.h"
 #include "rssfeed.h"
 
-/* Menu objects. */
-static GtkMenu *feed_menu = NULL;
+/* Feeds menu object. */
+static GtkMenu *feeds_menu = NULL;
+
+/* Application menu object. */
 static GtkMenu *app_menu = NULL;
 
-/* Icon event handlers. */
+/* The "activate" handler of the system tray icon.  ICON is the system tray
+   status icon object and USER_DATA is ignored.  This event handlers pops
+   up the feeds menu and displays it to the user. */
 static void
 on_activate (GtkStatusIcon *icon,
              gpointer       user_data)
 {
   g_assert (icon != NULL);
-  g_assert (feed_menu != NULL);
+  g_assert (feeds_menu != NULL);
 
-  gtk_menu_popup (feed_menu, NULL, NULL, gtk_status_icon_position_menu,
+  gtk_menu_popup (feeds_menu, NULL, NULL, gtk_status_icon_position_menu,
                   icon, 0, gtk_get_current_event_time ());
 }
 
+/* The "popup-menu" handler of the system tray icon.  ICON is the system
+   tray status icon object and USER_DATA is ignored.  This event handler
+   pops up the application menu and displayes it to the user. */
 static void
 on_popup_menu (GtkStatusIcon *icon,
                guint          button,
@@ -64,14 +70,29 @@ on_popup_menu (GtkStatusIcon *icon,
                   icon, button, activate_time);
 }
 
-/* Menu event handlers. */
+/* The "About" menu item handler.  ITEM is the menu item object and
+   USER_DATA is ignored.  This event handler shows the about dialog to the
+   user. */
 static void
 on_about (GtkMenuItem *item,
           gpointer     user_data)
 {
-  show_about_box ();
+  show_about_dialog ();
 }
 
+/* The "Add feed" menu item handler.  ITEM is the menu item object and
+   USER_DATA is ignored.  This event handler shows the add feed dialog to
+   the user. */
+static void
+on_add_feed (GtkMenuItem *item,
+             gpointer    *user_data)
+{
+  show_add_feed_dialog ();
+}
+
+/* The "Quit" menu item handler.  ITEM is the menu item object and
+   USER_DATA is ignored.  This event handler signals exit from GTK main
+   loop. */
 static void
 on_quit (GtkMenuItem *item,
          gpointer     user_data)
@@ -79,7 +100,13 @@ on_quit (GtkMenuItem *item,
   gtk_main_quit ();
 }
 
-/* Helper functions. */
+/* Builds the feeds menu from the contents of the FEEDS_FILE file.  Each
+   line in this file should contain an URL to a web feed.  Blank lines and
+   lines beginning with # are ignored.  Background threads are spawned for
+   each URL to parse the contets of the feed.  Returns the created menu
+   object, but the function does not wait for parser threads to finish.
+   The contents of the returned menu object will therefore change as the
+   feed parsers progress. */
 static GtkMenu *
 create_feed_menu (const char *feeds_file)
 {
@@ -144,6 +171,7 @@ create_feed_menu (const char *feeds_file)
   return menu;
 }
 
+/* Creates the application menu and returns the created menu object. */
 static GtkMenu *
 create_app_menu ()
 {
@@ -153,6 +181,15 @@ create_app_menu ()
   menu = GTK_MENU_SHELL(gtk_menu_new ());
   g_assert (menu != NULL);
 
+  item = gtk_menu_item_new_with_mnemonic ("_Add feed");
+  g_assert (item != NULL);
+  gtk_menu_shell_append (menu, item);
+  g_signal_connect (item, "activate", G_CALLBACK(on_add_feed), NULL);
+
+  item = gtk_separator_menu_item_new ();
+  g_assert (item != NULL);
+  gtk_menu_shell_append (menu, item);
+  
   item = gtk_image_menu_item_new_from_stock (GTK_STOCK_ABOUT, NULL);
   g_assert (item != NULL);
   gtk_menu_shell_append (menu, item);
@@ -205,7 +242,7 @@ main (int argc, char **argv)
     g_critical ("Couldn't open pixbuf from file %s.", icon_48x48_file);
 
   /* Create the menu objects.  */
-  feed_menu = create_feed_menu (options.feeds_file);
+  feeds_menu = create_feed_menu (options.feeds_file);
   app_menu = create_app_menu ();
 
   /* Create the system tray icon and connect the signals. */

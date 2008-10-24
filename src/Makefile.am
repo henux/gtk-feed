@@ -18,9 +18,10 @@
 bin_PROGRAMS = gtk-feed
 
 gtk_feed_SOURCES = \
-	about.c \
 	common.c \
 	common.h \
+	dialogs.c \
+	dialogs.h \
 	main.c \
 	options.c \
 	options.h \

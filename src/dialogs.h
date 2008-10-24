@@ -15,9 +15,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ABOUT_H
-#define ABOUT_H
+#ifndef DIALOGS_H
+#define DIALOGS_H
 
-void show_about_box ();
+void show_about_dialog ();
+void show_add_feed_dialog ();
 
 #endif

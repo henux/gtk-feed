@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <gtk/gtkmenu.h>
+#include <gtk/gtkmenuitem.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 extern GdkPixbuf *icon_16x16;
 extern GdkPixbuf *icon_48x48;
 
