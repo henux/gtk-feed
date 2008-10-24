@@ -83,25 +83,26 @@ on_quit (GtkMenuItem *item,
 static GtkMenu *
 create_feed_menu (const char *feeds_file)
 {
-  FILE         *fp;
-  GtkMenuShell *menu;
-  gsize         feeds_num = 0;
+  FILE    *fp;
+  GtkMenu *menu;
+  gsize    feeds_num = 0;
 
   g_debug ("Loading feed URLs from %s.", feeds_file);
+  
+  menu = GTK_MENU(gtk_menu_new ());
+  g_assert (menu != NULL);
+  gtk_widget_show (GTK_WIDGET(menu));
 
   /* Read URIs from the config and build the menu. */
   fp = fopen (feeds_file, "r");
   if (fp == NULL) {
+    add_menu_item_italic (menu, "Invalid feeds file");
     g_critical ("Couldn't open file %s.", feeds_file);
-    return NULL;
+    return menu;
   }
-
-  menu = GTK_MENU_SHELL(gtk_menu_new ());
-  g_assert (menu != NULL);
 
   while (1) {
     char           uri[100];
-    GtkWidget     *label, *item, *submenu;
     RSSFeedParser *parser;
     GThread       *thread;
 
@@ -115,27 +116,17 @@ create_feed_menu (const char *feeds_file)
       continue;
 
     /* Create a dummy menu item and submenu for this feed. */
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL(label),
-                          "<span style='italic'>Loading...</span>");
-
-    item = gtk_menu_item_new ();
-    gtk_container_add (GTK_CONTAINER(item), label);
-
-    submenu = gtk_menu_new ();
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM(item), submenu);
-    
-    gtk_menu_shell_append (menu, item);
-    gtk_widget_show_all (item);
-    
-    /* Spawn a thread for reading the feed from the URI. */
     parser = g_new (RSSFeedParser, 1);
     g_assert (parser != NULL);
 
     parser->feed_uri = g_strdup (uri);
-    parser->item = GTK_MENU_ITEM(item);
-    parser->submenu = GTK_MENU(submenu);
+    parser->item     = add_menu_item_italic (menu, "Loading...");
+    parser->submenu  = GTK_MENU(gtk_menu_new ());
 
+    gtk_menu_item_set_submenu (parser->item, GTK_WIDGET(parser->submenu));
+    gtk_widget_show (GTK_WIDGET(parser->submenu));
+    
+    /* Spawn a thread for reading the feed from the URI. */
     thread = g_thread_create (rss_feed_parser, parser, FALSE, NULL);
     if (thread == NULL) {
       g_critical ("Failed to spawn a thread for %s.", uri);
@@ -145,22 +136,12 @@ create_feed_menu (const char *feeds_file)
   }
 
   if (feeds_num == 0) {
-    GtkWidget *label, *item;
-
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL(label),
-                          "<span style='italic'>No feeds loaded.</span>");
-
-    item = gtk_menu_item_new ();
-    gtk_container_add (GTK_CONTAINER(item), label);
-
-    gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
+    add_menu_item_italic (menu, "No feeds loaded");
   }
-  
-  fclose (fp);
-  gtk_widget_show_all (GTK_WIDGET(menu));
 
-  return GTK_MENU(menu);
+  fclose (fp);
+
+  return menu;
 }
 
 static GtkMenu *

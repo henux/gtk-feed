@@ -56,7 +56,7 @@ on_open_url (GtkMenuItem *item,
 }
 
 /* Menu helpers */
-void
+GtkMenuItem *
 add_menu_item (GtkMenu *menu, const gchar *title)
 {
   GtkWidget *item;
@@ -65,15 +65,17 @@ add_menu_item (GtkMenu *menu, const gchar *title)
   g_assert (title != NULL);
 
   gdk_threads_enter ();
-
+  
   item = gtk_menu_item_new_with_label (title);
   gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show (item);
+  gtk_widget_show_all (item);
 
   gdk_threads_leave ();
+  
+  return GTK_MENU_ITEM(item);
 }
 
-void
+GtkMenuItem *
 add_menu_item_italic (GtkMenu *menu, const gchar *title)
 {
   GtkWidget *label, *item;
@@ -83,8 +85,9 @@ add_menu_item_italic (GtkMenu *menu, const gchar *title)
   g_assert (title != NULL);
 
   gdk_threads_enter ();
-
+  
   markup = g_strdup_printf ("<span style='italic'>%s</span>", title);
+
   label = gtk_label_new (NULL);
   gtk_label_set_markup (GTK_LABEL(label), markup);
   g_free (markup);
@@ -93,12 +96,14 @@ add_menu_item_italic (GtkMenu *menu, const gchar *title)
   gtk_container_add (GTK_CONTAINER(item), label);
 
   gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show (item);
+  gtk_widget_show_all (item);
 
   gdk_threads_leave ();
+  
+  return GTK_MENU_ITEM(item);
 }
 
-void
+GtkMenuItem *
 add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link)
 {
   GtkWidget *item;
@@ -112,12 +117,14 @@ add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link)
   item = gtk_menu_item_new_with_label (title);
   gtk_widget_set_tooltip_text (item, link);
   gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show (item);
+  gtk_widget_show_all (item);
 
   g_signal_connect (item, "activate", G_CALLBACK(on_open_url),
-                    g_strdup (link));
-  
+                    g_strdup (link));  
+
   gdk_threads_leave ();
+  
+  return GTK_MENU_ITEM(item);
 }
 
 void
@@ -134,6 +141,8 @@ set_menu_item (GtkMenuItem *item,
   label = gtk_bin_get_child (GTK_BIN(item));
   g_assert (label != NULL);
   gtk_label_set_text (GTK_LABEL(label), title);
+
+  gtk_widget_show_all (GTK_WIDGET(item));
 
   gdk_threads_leave ();
 }
@@ -157,6 +166,8 @@ set_menu_item_italic (GtkMenuItem *item,
 
   gtk_label_set_markup (GTK_LABEL(label), markup);
   g_free (markup);
+
+  gtk_widget_show_all (GTK_WIDGET(item));
 
   gdk_threads_leave ();
 }

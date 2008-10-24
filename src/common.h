@@ -22,15 +22,15 @@ extern GdkPixbuf *icon_16x16;
 extern GdkPixbuf *icon_48x48;
 
 /* Menu helper */
-void    add_menu_item (GtkMenu *menu, const gchar *title);
-void    add_menu_item_italic (GtkMenu *menu, const gchar *title);
-void    add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link);
+GtkMenuItem * add_menu_item (GtkMenu *menu, const gchar *title);
+GtkMenuItem * add_menu_item_italic (GtkMenu *menu, const gchar *title);
+GtkMenuItem * add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link);
 
-void    set_menu_item (GtkMenuItem *item, const gchar *title);
-void    set_menu_item_italic (GtkMenuItem *item, const gchar *title);
+void          set_menu_item (GtkMenuItem *item, const gchar *title);
+void          set_menu_item_italic (GtkMenuItem *item, const gchar *title);
 
 /* Filename helpers */
-gchar * get_pixmap_filename (const gchar *filename);
-gchar * get_config_filename (const gchar *filename);
+gchar *       get_pixmap_filename (const gchar *filename);
+gchar *       get_config_filename (const gchar *filename);
 
 #endif
