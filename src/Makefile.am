@@ -15,23 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = \
-	-I$(top_srcdir) \
-	-I$(top_builddir) \
-	$(XML_CPPFLAGS) \
-	$(GTK_CFLAGS) \
-	-DPREFIX=\"$(prefix)\" \
-	-DDATADIR=\"$(datadir)\"
-
 bin_PROGRAMS = gtk-feed
 
 gtk_feed_SOURCES = \
-	main.c \
 	about.c \
 	common.c \
 	common.h \
+	main.c \
+	options.c \
+	options.h \
 	rssfeed.c \
 	rssfeed.h
+
+gtk_feed_CPPFLAGS = \
+	$(XML_CPPFLAGS) \
+	-DPREFIX=\"$(prefix)\" \
+	-DDATADIR=\"$(datadir)\" \
+	-DG_LOG_DOMAIN=\"GTK-Feed\"
+
+gtk_feed_CFLAGS = \
+	-Wall \
+	-Werror \
+	$(GTK_CFLAGS)
 
 gtk_feed_LDADD = \
 	$(GTK_LIBS) \

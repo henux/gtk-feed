@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
+#include <glib/gmessages.h>
+#include <glib/gstrfuncs.h>
+
 #include <gtk/gtkmain.h>
 #include <gtk/gtkmenu.h>
 #include <gtk/gtkmenuitem.h>
@@ -27,7 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtkstatusicon.h>
 #include <gtk/gtkstock.h>
 
+#include "about.h"
 #include "common.h"
+#include "options.h"
 #include "rssfeed.h"
 
 /* Menu objects. */
@@ -82,6 +87,8 @@ create_feed_menu (const char *feeds_file)
   GtkMenuShell *menu;
   gsize         feeds_num = 0;
 
+  g_debug ("Loading feed URLs from %s.", feeds_file);
+
   /* Read URIs from the config and build the menu. */
   fp = fopen (feeds_file, "r");
   if (fp == NULL) {
@@ -116,7 +123,7 @@ create_feed_menu (const char *feeds_file)
     gtk_container_add (GTK_CONTAINER(item), label);
 
     submenu = gtk_menu_new ();
-    gtk_menu_item_set_submenu (item, submenu);
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM(item), submenu);
     
     gtk_menu_shell_append (menu, item);
     gtk_widget_show_all (item);
@@ -141,7 +148,8 @@ create_feed_menu (const char *feeds_file)
     GtkWidget *label, *item;
 
     label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL(label), "<span style='italic'>No feeds loaded.</span>");
+    gtk_label_set_markup (GTK_LABEL(label),
+                          "<span style='italic'>No feeds loaded.</span>");
 
     item = gtk_menu_item_new ();
     gtk_container_add (GTK_CONTAINER(item), label);
@@ -185,9 +193,8 @@ main (int argc, char **argv)
 {
   gchar         *icon_16x16_file;
   gchar         *icon_48x48_file;
-  gchar         *feed_file;
   GtkStatusIcon *icon;
-
+  
   /* Initialize GTK and other libraries. */
   g_thread_init (NULL);
   gdk_threads_init ();
@@ -195,11 +202,17 @@ main (int argc, char **argv)
 
   /* General application initialization. */
   g_set_application_name ("GTK Feed Reader");
-  
+
+  /* Handle command line options. */
+  if (!get_options (&argc, &argv))
+    return 1;
+
   /* Build filenames. */
   icon_16x16_file = get_pixmap_filename ("feed-icon-16x16.png");
   icon_48x48_file = get_pixmap_filename ("feed-icon-48x48.png");
-  feed_file = get_config_filename ("feeds");
+
+  if (options.feeds_file == NULL)
+    options.feeds_file = get_config_filename ("feeds");
 
   /* Load icon pixbufs. */
   icon_16x16 = gdk_pixbuf_new_from_file (icon_16x16_file, NULL);
@@ -208,10 +221,10 @@ main (int argc, char **argv)
   if (icon_16x16 == NULL)
     g_critical ("Couldn't open pixbuf from file %s.", icon_16x16_file);
   if (icon_48x48 == NULL)
-    g_critical ("Coulnd't open pixbuf from file %s.", icon_48x48_file);
-  
+    g_critical ("Couldn't open pixbuf from file %s.", icon_48x48_file);
+
   /* Create the menu objects.  */
-  feed_menu = create_feed_menu (feed_file);
+  feed_menu = create_feed_menu (options.feeds_file);
   app_menu = create_app_menu ();
 
   /* Create the system tray icon and connect the signals. */
@@ -219,10 +232,9 @@ main (int argc, char **argv)
   g_signal_connect (icon, "activate", G_CALLBACK(on_activate), NULL);
   g_signal_connect (icon, "popup-menu", G_CALLBACK(on_popup_menu), NULL);
 
-  /* Free the filenames. */
+  /* Free filenames before entering the main loop. */
   g_free (icon_16x16_file);
   g_free (icon_48x48_file);
-  g_free (feed_file);
 
   /* Run the main loop. */
   gtk_main ();

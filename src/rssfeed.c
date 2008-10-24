@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
+#include <glib/gmem.h>
+#include <glib/gmessages.h>
+#include <glib/gstrfuncs.h>
+
 #include <gtk/gtkmenu.h>
 #include <gtk/gtkmenuitem.h>
 #include <gtk/gtklabel.h>
@@ -35,7 +39,6 @@ parse_item_element (xmlNodePtr root,
                     GtkMenu   *submenu)
 {
   xmlNodePtr  node;
-  GtkWidget  *item;
   gchar      *title = NULL;
   gchar      *link = NULL;
 
@@ -68,7 +71,6 @@ parse_channel_element (xmlNodePtr   root,
                        GtkMenu     *submenu)
 {
   xmlNodePtr  node;
-  GtkWidget  *menu;
   gchar      *title = NULL;
   
   g_assert (root != NULL);
@@ -109,7 +111,7 @@ parse_rss_element (xmlNodePtr   root,
     }
   }
 
-  set_menu_item_italic (submenu, "Invalid RSS feed");
+  set_menu_item_italic (item, "Invalid RSS feed");
   g_critical ("<channel> element not found.");
 }
 
@@ -131,7 +133,7 @@ parse_doc (xmlDocPtr    doc,
     }
   }  
 
-  set_menu_item_italic (submenu, "Invalid RSS feed");
+  set_menu_item_italic (item, "Invalid RSS feed");
   g_critical ("<rssl> element not found.");
 }
 
@@ -147,7 +149,7 @@ rss_feed_parser (gpointer data)
   g_assert (parser->item != NULL);
   g_assert (parser->submenu != NULL);
 
-  g_debug ("Started to read %s.", parser->feed_uri);
+  g_debug ("Started reading %s", parser->feed_uri);
   
   /* Parse the XML file into DOM tree. */
   doc = xmlReadFile (parser->feed_uri, NULL, 0);
@@ -159,7 +161,7 @@ rss_feed_parser (gpointer data)
 
   /* Process the DOM tree. */
   parse_doc (doc, parser->item, parser->submenu);
-  g_debug ("Finished reading %s.", parser->feed_uri);
+  g_debug ("Finished reading %s", parser->feed_uri);
 
   /* Cleanup. */
  cleanup:

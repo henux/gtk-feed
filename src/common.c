@@ -19,10 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
-#include <glib.h>
+#include <glib/gmem.h>
+#include <glib/gmessages.h>
+#include <glib/gstrfuncs.h>
+#include <glib/gspawn.h>
+
 #include <gtk/gtkmenu.h>
 #include <gtk/gtkmenuitem.h>
 #include <gtk/gtklabel.h>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "common.h"

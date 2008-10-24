@@ -1,3 +1,16 @@
+2008-10-24  Henri Häkkinen  <henux@users.sourceforge.net>
+
+	* configure.ac: Compacted the AC_INIT directive space usage.
+	* src/Makefile.am: Moved AM_CPPFLAGS into gtk_feed_CPPFLAGS and
+	gtk_feed_CFLAGS, and included -DG_LOG_DOMAIN=\"GTK-Feed\" to
+	gtk_feed_CFLAGS.
+	* src/common.c: Removed the `#include <glib.h>' and included the
+	individual `<glib/xxx>' headers instead.
+	* src/options.[ch]: Implemented the basic command line option
+	parser.
+	* src/rssfeed.c: Included the missing glib includes, removed some
+	unused variables and corrected some parameters.
+
 2008-10-23  Henri Häkkinen  <henux@users.sourceforge.net>
 
 	* common.c (add_menu_item_link): Shows the URL in the tooltip.
