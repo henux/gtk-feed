@@ -75,46 +75,100 @@ show_about_dialog ()
 
 /***** SUBSCRIBE DIALOG *****/
 
-/* The subscribe dialog instance. */
-static GtkDialog *subscribe_dialog = NULL;
-
+/* Subscibe dialog response handler. */
 static void
 on_subscribe_response (GtkDialog *dialog,
                        gint       response_id,
                        gpointer   user_data)
 {
-  g_debug ("Add feed response: %d", response_id);
-  subscribe_dialog = NULL;
+  /* TODO */
+}
+
+/* Creates the singleton subscribe dialog object.  Subsequent calls will
+   return the same dialog object instance. */
+static GtkWidget  *
+get_subscribe_dialog ()
+{
+  static GtkWidget *subscribe_dialog = NULL;
+
+  if (subscribe_dialog == NULL) {
+    GtkWidget
+      *cancel, *ok,
+      *content_area, *action_area, *table,
+      *url_label, *url_entry,
+      *title_label, *title_entry;
+
+    /* Subscribe dialog */
+    subscribe_dialog = g_object_new (GTK_TYPE_DIALOG,
+                                     "title", "Subscribe",
+                                     "has-separator", FALSE,
+                                     "border-width", 12,
+                                     "resizable", FALSE,
+                                     NULL);
+
+    g_signal_connect (subscribe_dialog,
+                      "response",
+                      G_CALLBACK(on_subscribe_response),
+                      NULL);
+
+    cancel = gtk_dialog_add_button (GTK_DIALOG(subscribe_dialog),
+                                    GTK_STOCK_CANCEL,
+                                    GTK_RESPONSE_CANCEL);
+
+    ok = gtk_dialog_add_button (GTK_DIALOG(subscribe_dialog),
+                                GTK_STOCK_OK,
+                                GTK_RESPONSE_OK);
+
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG(subscribe_dialog));
+    g_object_set (content_area, "spacing", 12, NULL);
+
+    action_area = gtk_dialog_get_action_area (GTK_DIALOG(subscribe_dialog));
+
+    /* Table layout */
+    table = g_object_new (GTK_TYPE_TABLE,
+                          "n-columns", 2,
+                          "n-rows", 2,
+                          "column-spacing", 12,
+                          NULL);
+
+    gtk_box_pack_start (GTK_BOX(content_area), table, TRUE, TRUE, 0);
+  
+    /* Title label */
+    title_label = g_object_new (GTK_TYPE_LABEL,
+                                "label", "Title:",
+                                NULL);
+
+    gtk_table_attach_defaults (GTK_TABLE(table), title_label, 0, 1, 0, 1);
+
+    /* Title entry */
+    title_entry = g_object_new (GTK_TYPE_ENTRY, NULL);
+
+    gtk_table_attach_defaults (GTK_TABLE(table), title_entry, 1, 2, 0, 1);
+
+    /* Location label */
+    url_label = g_object_new (GTK_TYPE_LABEL,
+                              "label", "Location:",
+                              NULL);
+
+    gtk_table_attach_defaults (GTK_TABLE(table), url_label, 0, 1, 1, 2);
+
+    /* Location entry */
+    url_entry = g_object_new (GTK_TYPE_ENTRY, NULL);
+
+    gtk_table_attach_defaults (GTK_TABLE(table), url_entry, 1, 2, 1, 2);
+  }
+
+  return subscribe_dialog;
 }
 
 /* Shows the subscribe dialog. */
 void
 show_subscribe_dialog ()
 {
-  GtkWidget *dialog, *content, *label, *entry;
+  GtkWidget *dialog;
 
-  if (subscribe_dialog != NULL)
-    return;
+  dialog = get_subscribe_dialog ();
+  g_assert (dialog != NULL);
 
-  dialog = gtk_dialog_new_with_buttons ("Subscribe",
-                                        NULL,
-                                        0,
-                                        GTK_STOCK_CANCEL,
-                                        GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OK,
-                                        GTK_RESPONSE_OK,
-                                        NULL);
-
-  g_signal_connect (dialog, "response", G_CALLBACK(on_subscribe_response), NULL);
-  
-  content = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
-
-  label = gtk_label_new ("Enter the website URL:");
-  gtk_box_pack_start (GTK_BOX(content), label, TRUE, TRUE, 0);
-
-  entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX(content), entry, TRUE, TRUE, 0);
-
-  subscribe_dialog = GTK_DIALOG(dialog);
   gtk_widget_show_all (dialog);
 }
