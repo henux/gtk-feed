@@ -18,23 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <gtk/gtkmenu.h>
-#include <gtk/gtkmenuitem.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+/* Stock IDs. */
+#define GTK_FEED_ICON  "gtk-feed-icon"
 
-extern GdkPixbuf *icon_16x16;
-extern GdkPixbuf *icon_48x48;
+/* Global singletons */
+GtkStatusIcon *  get_status_icon ();
+GtkIconFactory * get_icon_factory ();
+GdkPixbuf *      get_app_logo ();
+GtkMenu *        get_feeds_menu ();
+GtkMenu *        get_main_menu ();
 
-/* Menu helper */
-GtkMenuItem * add_menu_item (GtkMenu *menu, const gchar *title);
-GtkMenuItem * add_menu_item_italic (GtkMenu *menu, const gchar *title);
-GtkMenuItem * add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link);
+/* Misc. helpers */
+gboolean         open_url (const gchar *url, GError **error);
 
-void          set_menu_item (GtkMenuItem *item, const gchar *title);
-void          set_menu_item_italic (GtkMenuItem *item, const gchar *title);
+/* Menu helpers */
+GtkMenuItem *    add_menu_item (GtkMenu *menu, const gchar *title);
+GtkMenuItem *    add_menu_item_italic (GtkMenu *menu, const gchar *title);
+GtkMenuItem *    add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link);
 
-/* Filename helpers */
-gchar *       get_pixmap_filename (const gchar *filename);
-gchar *       get_config_filename (const gchar *filename);
+void             set_menu_item (GtkMenuItem *item, const gchar *title);
+void             set_menu_item_italic (GtkMenuItem *item, const gchar *title);
 
 #endif

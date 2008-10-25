@@ -15,10 +15,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DIALOGS_H
-#define DIALOGS_H
+#ifndef CALLBACKS_H
+#define CALLBACKS_H
 
-void show_about_dialog ();
-void show_subscribe_dialog ();
+/* System tray icon callbacks */
+void on_icon_activate (GtkStatusIcon *, gpointer);
+void on_icon_popup_menu (GtkStatusIcon *, guint, guint, gpointer);
+
+/* Feed menu callbacks */
+void on_feed_open (GtkMenuItem *, gpointer);
+
+/* Main menu callbacks */
+void on_main_about (GtkMenuItem *, gpointer);
+void on_main_subscribe (GtkMenuItem *, gpointer);
+void on_main_quit (GtkMenuItem *, gpointer);
 
 #endif

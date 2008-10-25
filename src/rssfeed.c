@@ -19,13 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
-#include <glib/gmem.h>
-#include <glib/gmessages.h>
-#include <glib/gstrfuncs.h>
-
-#include <gtk/gtkmenu.h>
-#include <gtk/gtkmenuitem.h>
-#include <gtk/gtklabel.h>
+#include <gtk/gtk.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -61,7 +55,10 @@ parse_item_element (xmlNodePtr root,
   } else {
     g_strstrip (title);
     g_strstrip (link);
+
+    gdk_threads_enter ();
     add_menu_item_link (submenu, title, link);
+    gdk_threads_leave ();
   }
 }
 
@@ -86,10 +83,15 @@ parse_channel_element (xmlNodePtr   root,
   }
 
   if (title == NULL) {
+    gdk_threads_enter ();
     set_menu_item_italic (item, "No title");
+    gdk_threads_leave ();
+
     g_critical ("<channel> element doesn't have <title> element.");
   } else {
+    gdk_threads_enter ();
     set_menu_item (item, title);
+    gdk_threads_leave ();
   }
 }
 
@@ -111,7 +113,10 @@ parse_rss_element (xmlNodePtr   root,
     }
   }
 
+  gdk_threads_enter ();
   set_menu_item_italic (item, "Invalid RSS feed");
+  gdk_threads_leave ();
+
   g_critical ("<channel> element not found.");
 }
 
@@ -133,7 +138,10 @@ parse_doc (xmlDocPtr    doc,
     }
   }  
 
+  gdk_threads_enter ();
   set_menu_item_italic (item, "Invalid RSS feed");
+  gdk_threads_leave ();
+
   g_critical ("<rssl> element not found.");
 }
 
@@ -154,7 +162,10 @@ rss_feed_parser (gpointer data)
   /* Parse the XML file into DOM tree. */
   doc = xmlReadFile (parser->feed_uri, NULL, 0);
   if (doc == NULL) {
+    gdk_threads_enter ();
     set_menu_item_italic (parser->item, "Invalid feed URL");
+    gdk_threads_leave ();
+
     g_warning ("Couldn't read %s.", parser->feed_uri);
     goto cleanup;
   }

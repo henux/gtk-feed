@@ -18,6 +18,8 @@
 bin_PROGRAMS = gtk-feed
 
 gtk_feed_SOURCES = \
+	callbacks.c \
+	callbacks.h \
 	common.c \
 	common.h \
 	dialogs.c \

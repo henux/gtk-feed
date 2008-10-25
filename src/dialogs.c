@@ -19,13 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
-#include <gtk/gtkaboutdialog.h>
-#include <gtk/gtkdialog.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkhbox.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtkstock.h>
-#include <gtk/gtkvbox.h>
+#include <gtk/gtk.h>
 
 #include "dialogs.h"
 #include "common.h"
@@ -63,7 +57,7 @@ static const gchar *license =
 static const gchar *website =
   "http://henux.nor.fi/coding/projects/15-gtk/24-gtk-feed";
 
-/* Shows the About dialog. */
+/* Shows the about dialog. */
 void
 show_about_dialog ()
 {
@@ -72,37 +66,37 @@ show_about_dialog ()
                          "comments", comments,
                          "copyright", copyright,
                          "license", license,
-                         "logo", icon_48x48,
+                         "logo", get_app_logo (),
                          "version", PACKAGE_VERSION,
                          "wrap-license", TRUE,
                          "website", website,
                          NULL);
 }
 
-/***** ADD FEED DIALOG *****/
+/***** SUBSCRIBE DIALOG *****/
 
-/* The 'Add feed' dialog instance. */
-static GtkDialog *add_feed_dialog = NULL;
+/* The subscribe dialog instance. */
+static GtkDialog *subscribe_dialog = NULL;
 
 static void
-on_add_feed_response (GtkDialog *dialog,
-                      gint       response_id,
-                      gpointer   user_data)
+on_subscribe_response (GtkDialog *dialog,
+                       gint       response_id,
+                       gpointer   user_data)
 {
   g_debug ("Add feed response: %d", response_id);
-  add_feed_dialog = NULL;
+  subscribe_dialog = NULL;
 }
 
-/* Shows the 'Add feed' dialog. */
+/* Shows the subscribe dialog. */
 void
-show_add_feed_dialog ()
+show_subscribe_dialog ()
 {
   GtkWidget *dialog, *content, *label, *entry;
 
-  if (add_feed_dialog != NULL)
+  if (subscribe_dialog != NULL)
     return;
 
-  dialog = gtk_dialog_new_with_buttons ("Add feed",
+  dialog = gtk_dialog_new_with_buttons ("Subscribe",
                                         NULL,
                                         0,
                                         GTK_STOCK_CANCEL,
@@ -111,7 +105,7 @@ show_add_feed_dialog ()
                                         GTK_RESPONSE_OK,
                                         NULL);
 
-  g_signal_connect (dialog, "response", G_CALLBACK(on_add_feed_response), NULL);
+  g_signal_connect (dialog, "response", G_CALLBACK(on_subscribe_response), NULL);
   
   content = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
 
@@ -121,6 +115,6 @@ show_add_feed_dialog ()
   entry = gtk_entry_new ();
   gtk_box_pack_start (GTK_BOX(content), entry, TRUE, TRUE, 0);
 
-  add_feed_dialog = GTK_DIALOG(dialog);
+  subscribe_dialog = GTK_DIALOG(dialog);
   gtk_widget_show_all (dialog);
 }
