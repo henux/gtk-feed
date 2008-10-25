@@ -33,7 +33,6 @@ gtk_feed_SOURCES = \
 gtk_feed_CPPFLAGS = \
 	$(XML_CPPFLAGS) \
 	-DPREFIX=\"$(prefix)\" \
-	-DDATADIR=\"$(datadir)\" \
 	-DG_LOG_DOMAIN=\"GTK-Feed\"
 
 gtk_feed_CFLAGS = \

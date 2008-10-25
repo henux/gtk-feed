@@ -16,8 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 EXTRA_DIST = \
-	feed-icon.png
+	gtk-feed.svg
 
-pixmapdir = $(pkgdatadir)/pixmaps
-pixmap_DATA = \
-	feed-icon.png
+icondir = $(prefix)/share/icons/hicolor/scalable/apps
+icon_DATA = \
+	gtk-feed.svg

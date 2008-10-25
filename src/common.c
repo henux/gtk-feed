@@ -33,9 +33,7 @@ get_status_icon ()
   static GtkStatusIcon *status_icon = NULL;
 
   if (status_icon == NULL) {
-    gtk_icon_factory_add_default (get_icon_factory ());
-
-    status_icon = gtk_status_icon_new_from_stock (GTK_FEED_ICON);
+    status_icon = gtk_status_icon_new_from_icon_name ("gtk-feed");
 
     g_signal_connect (status_icon,
                       "activate",
@@ -49,71 +47,6 @@ get_status_icon ()
   }
 
   return status_icon;
-}
-
-/* Creates the singleton icon factory object.  Subsequent calls will return
-   the same icon factory object.  The returned icon factory contains all
-   gtk-feed related stock icons, and the object should be passed to
-   gtk_icon_factory_add_default. */
-GtkIconFactory *
-get_icon_factory ()
-{
-  static GtkIconFactory *icon_factory = NULL;
-
-  if (icon_factory == NULL) {
-    gchar         *feed_icon_filename;
-    GtkIconSource *feed_icon_source;
-    GtkIconSet    *feed_icon_set;
-
-    feed_icon_filename = g_build_filename (DATADIR,
-                                           PACKAGE,
-                                           "pixmaps",
-                                           "feed-icon.png",
-                                           NULL);
-    
-    feed_icon_source = gtk_icon_source_new ();
-    gtk_icon_source_set_filename (feed_icon_source,
-                                  feed_icon_filename);
-    
-    feed_icon_set = gtk_icon_set_new ();
-    gtk_icon_set_add_source (feed_icon_set,
-                             feed_icon_source);
-
-    icon_factory = gtk_icon_factory_new ();
-    gtk_icon_factory_add (icon_factory,
-                          GTK_FEED_ICON,
-                          feed_icon_set);
-
-    g_free (feed_icon_filename);
-  }
-
-  return icon_factory;
-}
-
-/* Creates the singleton application logo pixel buffer object.  Subsequent
-   calls will return the same pixbuf object. */
-GdkPixbuf *
-get_app_logo ()
-{
-  static GdkPixbuf *logo_pixbuf = NULL;
-
-  if (logo_pixbuf == NULL) {
-    gchar *logo_filename;
-
-    logo_filename = g_build_filename (DATADIR,
-                                      PACKAGE,
-                                      "pixmaps",
-                                      "feed-icon.png",
-                                      NULL);
-    
-    logo_pixbuf = gdk_pixbuf_new_from_file (logo_filename, NULL);
-
-    if (logo_pixbuf == NULL) {
-      g_critical ("Failed to load %s", logo_filename);
-    }
-  }
-
-  return logo_pixbuf;
 }
 
 /* Creates the singleton feeds menu object.  Subsequent calls will return
@@ -204,8 +137,8 @@ get_main_menu ()
 
     main_menu = GTK_MENU(gtk_menu_new ());
 
-    image = gtk_image_new_from_stock (GTK_FEED_ICON,
-                                      GTK_ICON_SIZE_MENU);
+    image = gtk_image_new_from_icon_name ("gtk-feed", GTK_ICON_SIZE_MENU);
+    
     item = gtk_image_menu_item_new_with_mnemonic ("_Subscribe");
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item),
                                    image);
@@ -379,19 +312,4 @@ set_menu_item_italic (GtkMenuItem *item,
   gtk_widget_show_all (GTK_WIDGET(item));
 
   //gdk_threads_leave ();
-}
-
-/* Filename helpers */
-gchar *
-get_pixmap_filename (const gchar *filename)
-{
-  return g_build_filename (DATADIR, PACKAGE_NAME, "pixmaps",
-                           filename, NULL);
-}
-
-gchar *
-get_config_filename (const gchar *filename)
-{
-  return g_build_filename (g_get_user_config_dir (), PACKAGE_NAME,
-                           filename, NULL);
 }

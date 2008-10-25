@@ -33,6 +33,7 @@ main (int argc, char **argv)
 
   /* Initialize the application. */
   g_set_application_name ("GTK Feed Reader");
+  gtk_window_set_default_icon_name ("gtk-feed");
   get_feeds_menu ();
   get_status_icon ();
 
