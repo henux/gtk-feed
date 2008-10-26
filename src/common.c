@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
+#include <glib/gthread.h>
 #include <gtk/gtk.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include "callbacks.h"
 #include "common.h"
@@ -49,77 +52,118 @@ get_status_icon ()
   return status_icon;
 }
 
+/* Parses the <feed> element and it's child elements. */
+static void
+parse_feed_element (xmlNodePtr  root,
+                    GtkWidget  *menu)
+{
+  xmlNodePtr  node;
+  GtkWidget  *menu_item;
+
+  g_assert (root != NULL);
+
+  menu_item = gtk_menu_item_new ();
+  gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
+
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
+      gchar     *title;
+      GtkWidget *label;
+
+      title = (gchar *) xmlNodeGetContent (node);
+      g_strstrip (title);
+
+      label = g_object_new (GTK_TYPE_LABEL,
+                            "label", title,
+                            "xalign", 0.0f,
+                            NULL);
+
+      gtk_container_add (GTK_CONTAINER(menu_item), label);
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "icon-url") == 0) {
+      /* TODO */
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "feed-url") == 0) {
+      RSSFeedParser *parser;
+
+      parser = g_new0 (RSSFeedParser, 1);
+      parser->feed_uri = g_strdup ((const gchar *) xmlNodeGetContent (node));
+      parser->feed_menu = gtk_menu_new ();
+
+      gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_item),
+                                 parser->feed_menu);
+
+      if (g_thread_create ((GThreadFunc) rss_feed_parser, parser, FALSE, NULL) == NULL) {
+        g_critical ("Failed to create parser thread for %s", parser->feed_uri);
+        g_free (parser);
+      }
+    } else {
+      g_message ("Skipping unknown element <%s>", node->name);
+    }
+  }
+}
+
+/* Parses the <feeds> element and it's child elements. */
+static void
+parse_feeds_element (xmlNodePtr  root,
+                     GtkWidget  *menu)
+{
+  xmlNodePtr   node;
+  g_assert (root != NULL);
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "feed") == 0) {
+      parse_feed_element (node, menu);
+    } else {
+      g_message ("Skipping unknown element <%s>", node->name);
+    }
+  }
+}
+
 /* Creates the singleton feeds menu object.  Subsequent calls will return
    the same menu object. */
-GtkMenu *
+GtkWidget *
 get_feeds_menu ()
 {
-  static GtkMenu *feeds_menu = NULL;
+  static GtkWidget *feeds_menu = NULL;
 
   if (feeds_menu == NULL) {
-    FILE  *fp;
-    gsize  feeds_num = 0;
-    gchar *feeds_file;
+    gchar      *filename;
+    xmlDocPtr   doc;
+    xmlNodePtr  node;
 
-    feeds_file = g_build_filename (g_get_user_config_dir(),
-                                   PACKAGE,
-                                   "feeds",
-                                   NULL);
-  
-    g_debug ("Loading feed URLs from %s.", feeds_file);
-  
-    feeds_menu = GTK_MENU(gtk_menu_new ());
-    gtk_widget_show (GTK_WIDGET(feeds_menu));
+    feeds_menu = gtk_menu_new ();
 
-    /* Read URIs from the config and build the menu. */
-    fp = fopen (feeds_file, "r");
-    if (fp == NULL) {
-      add_menu_item_italic (feeds_menu, "Invalid feeds file");
-      g_critical ("Couldn't open file %s.", feeds_file);
-      g_free (feeds_file);
-      return feeds_menu;
+    filename = g_build_filename (g_get_user_config_dir (),
+                                 PACKAGE,
+                                 "feeds.xml",
+                                 NULL);
+
+    doc = xmlReadFile (filename, NULL, 0);
+    if (doc == NULL) {
+      g_critical ("Failed to read %s", filename);
+      goto cleanup;
     }
 
-    g_free (feeds_file);
-
-    while (1) {
-      char           uri[100];
-      RSSFeedParser *parser;
-      GThread       *thread;
-
-      /* Read an URI from the file and strip whitespaces. */
-      if (fgets (uri, 100, fp) == NULL)
-        break;
-      g_strstrip (uri);
-
-      /* If the line starts with # or is empty, skip it. */
-      if (uri[0] == '#' || uri[0] == '\0')
-        continue;
-
-      /* Create a dummy menu item and submenu for this feed. */
-      parser = g_new (RSSFeedParser, 1);
-
-      parser->feed_uri = g_strdup (uri);
-      parser->item = add_menu_item_italic (feeds_menu, "Loading...");
-      parser->submenu = GTK_MENU(gtk_menu_new ());
-
-      gtk_menu_item_set_submenu (parser->item, GTK_WIDGET(parser->submenu));
-      gtk_widget_show (GTK_WIDGET(parser->submenu));
-
-      /* Spawn a thread for reading the feed from the URI. */
-      thread = g_thread_create (rss_feed_parser, parser, FALSE, NULL);
-      if (thread == NULL) {
-        g_critical ("Failed to spawn parser thread for %s.", uri);
-      }
-      
-      ++feeds_num;
-    }
-
-    if (feeds_num == 0) {
-      add_menu_item_italic (feeds_menu, "No feeds loaded");
-    }
+    g_debug ("Reading %s", filename);
     
-    fclose (fp);
+    for (node = xmlDocGetRootElement (doc); node != NULL; node = node->next) {
+      if (node->type != XML_ELEMENT_NODE) {
+        continue;
+      } else if (xmlStrcmp (node->name, (const xmlChar *) "feeds") == 0) {
+        parse_feeds_element (node, feeds_menu);
+        break;
+      } else {
+        g_message ("Skippping unknown element <%s>", node->name);
+      }
+    }
+
+  cleanup:
+    g_debug ("Done reading %s", filename);
+    xmlFreeDoc (doc);
+    g_free (filename);
+    gtk_widget_show_all (feeds_menu);
   }
   
   return feeds_menu;
@@ -127,17 +171,18 @@ get_feeds_menu ()
 
 /* Creates the singleton main menu object.  Subsequent calls will return
    the same menu object. */
-GtkMenu *
+GtkWidget *
 get_main_menu ()
 { 
-  static GtkMenu *main_menu = NULL;
+  static GtkWidget *main_menu = NULL;
 
   if (main_menu == NULL) {
     GtkWidget *item, *image;
 
-    main_menu = GTK_MENU(gtk_menu_new ());
+    main_menu = gtk_menu_new ();
 
-    image = gtk_image_new_from_icon_name ("gtk-feed", GTK_ICON_SIZE_MENU);
+    image = gtk_image_new_from_icon_name ("gtk-feed",
+                                          GTK_ICON_SIZE_MENU);
     
     item = gtk_image_menu_item_new_with_mnemonic ("_Subscribe");
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item),
@@ -165,10 +210,10 @@ get_main_menu ()
                       G_CALLBACK(on_main_quit),
                       NULL);
 
-    gtk_widget_show_all (GTK_WIDGET(main_menu));
+    gtk_widget_show_all (main_menu);
   }
 
-  return GTK_MENU(main_menu);
+  return main_menu;
 }
 
 /* Open the given URL in the system's web browser.  This is done by running
@@ -193,123 +238,4 @@ open_url (const gchar *url, GError **error)
   g_free (command);
 
   return result;
-}
-
-/* Menu helpers */
-GtkMenuItem *
-add_menu_item (GtkMenu *menu, const gchar *title)
-{
-  GtkWidget *item;
-
-  g_assert (menu != NULL);
-  g_assert (title != NULL);
-
-  //gdk_threads_enter ();
-  
-  item = gtk_menu_item_new_with_label (title);
-  gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show_all (item);
-
-  //gdk_threads_leave ();
-  
-  return GTK_MENU_ITEM(item);
-}
-
-GtkMenuItem *
-add_menu_item_italic (GtkMenu *menu, const gchar *title)
-{
-  GtkWidget *label, *item;
-  gchar     *markup;
-
-  g_assert (menu != NULL);
-  g_assert (title != NULL);
-
-  //gdk_threads_enter ();
-  
-  markup = g_strdup_printf ("<span style='italic'>%s</span>", title);
-
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), markup);
-  g_free (markup);
-  
-  item = gtk_menu_item_new ();
-  gtk_container_add (GTK_CONTAINER(item), label);
-
-  gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show_all (item);
-
-  //gdk_threads_leave ();
-  
-  return GTK_MENU_ITEM(item);
-}
-
-GtkMenuItem *
-add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link)
-{
-  GtkWidget *item;
-
-  g_assert (menu != NULL);
-  g_assert (title != NULL);
-  g_assert (link != NULL);
-
-  //gdk_threads_enter ();
-
-  item = gtk_menu_item_new_with_label (title);
-  gtk_widget_set_tooltip_text (item, link);
-  gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
-  gtk_widget_show_all (item);
-
-  g_signal_connect (item,
-                    "activate",
-                    G_CALLBACK(on_feed_open),
-                    g_strdup (link));  
-
-  //gdk_threads_leave ();
-  
-  return GTK_MENU_ITEM(item);
-}
-
-void
-set_menu_item (GtkMenuItem *item,
-               const gchar *title)
-{
-  GtkWidget *label;
-
-  g_assert (item != NULL);
-  g_assert (title != NULL);
-
-  //gdk_threads_enter ();
-
-  label = gtk_bin_get_child (GTK_BIN(item));
-  g_assert (label != NULL);
-  gtk_label_set_text (GTK_LABEL(label), title);
-
-  gtk_widget_show_all (GTK_WIDGET(item));
-
-  //gdk_threads_leave ();
-}
-
-void
-set_menu_item_italic (GtkMenuItem *item,
-                      const gchar *title)
-{
-  GtkWidget *label;
-  gchar     *markup;
-
-  g_assert (item != NULL);
-  g_assert (title != NULL);
-
-  //gdk_threads_enter ();
-
-  markup = g_strdup_printf ("<span style='italic'>%s</span>", title);
-
-  label = gtk_bin_get_child (GTK_BIN(item));
-  g_assert (label != NULL);
-
-  gtk_label_set_markup (GTK_LABEL(label), markup);
-  g_free (markup);
-
-  gtk_widget_show_all (GTK_WIDGET(item));
-
-  //gdk_threads_leave ();
 }

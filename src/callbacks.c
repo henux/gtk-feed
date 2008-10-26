@@ -33,7 +33,7 @@ void
 on_icon_activate (GtkStatusIcon *icon,
                   gpointer       user_data)
 {
-  gtk_menu_popup (get_feeds_menu (),
+  gtk_menu_popup (GTK_MENU(get_feeds_menu ()),
                   NULL,
                   NULL,
                   gtk_status_icon_position_menu,
@@ -51,7 +51,7 @@ on_icon_popup_menu (GtkStatusIcon *icon,
                     guint          activate_time,
                     gpointer       user_data)
 {
-  gtk_menu_popup (get_main_menu (),
+  gtk_menu_popup (GTK_MENU(get_main_menu ()),
                   NULL,
                   NULL,
                   gtk_status_icon_position_menu,

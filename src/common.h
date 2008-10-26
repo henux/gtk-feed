@@ -20,18 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Global singletons */
 GtkStatusIcon * get_status_icon ();
-GtkMenu *       get_feeds_menu ();
-GtkMenu *       get_main_menu ();
+GtkWidget *     get_feeds_menu ();
+GtkWidget *     get_main_menu ();
 
 /* Misc. helpers */
 gboolean        open_url (const gchar *url, GError **error);
-
-/* Menu helpers */
-GtkMenuItem *   add_menu_item (GtkMenu *menu, const gchar *title);
-GtkMenuItem *   add_menu_item_italic (GtkMenu *menu, const gchar *title);
-GtkMenuItem *   add_menu_item_link (GtkMenu *menu, const gchar *title, const gchar *link);
-
-void            set_menu_item (GtkMenuItem *item, const gchar *title);
-void            set_menu_item_italic (GtkMenuItem *item, const gchar *title);
 
 #endif

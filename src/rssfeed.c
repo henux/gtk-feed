@@ -20,161 +20,114 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <gtk/gtk.h>
-
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#include "callbacks.h"
 #include "common.h"
 #include "rssfeed.h"
 
-/* Parser functions. */
 static void
-parse_item_element (xmlNodePtr root,
-                    GtkMenu   *submenu)
+parse_item_element (xmlNodePtr  root,
+                    GtkWidget  *menu)
 {
   xmlNodePtr  node;
-  gchar      *title = NULL;
-  gchar      *link = NULL;
+  GtkWidget  *menu_item;
 
   g_assert (root != NULL);
 
+  menu_item = gtk_menu_item_new ();
   for (node = root->children; node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
+      gchar     *title;
+      GtkWidget *label;
+
       title = (gchar *) xmlNodeGetContent (node);
+      g_strstrip (title);
+
+      label = g_object_new (GTK_TYPE_LABEL,
+                            "label", title,
+                            "xalign", 0.0f,
+                            NULL);
+
+      gtk_container_add (GTK_CONTAINER(menu_item), label);
     } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
-      link = (gchar *) xmlNodeGetContent (node);
-    }
-  }
-
-  if (title == NULL) {
-    g_critical ("<item> element doesn't have <title> element.");
-  } else if (link == NULL) {
-    g_critical ("<item> element doesn't have <link> element.");
-  } else {
-    g_strstrip (title);
-    g_strstrip (link);
-
-    gdk_threads_enter ();
-    add_menu_item_link (submenu, title, link);
-    gdk_threads_leave ();
-  }
-}
-
-static void
-parse_channel_element (xmlNodePtr   root,
-                       GtkMenuItem *item,
-                       GtkMenu     *submenu)
-{
-  xmlNodePtr  node;
-  gchar      *title = NULL;
-  
-  g_assert (root != NULL);
-
-  for (node = root->children; node != NULL; node = node->next) {
-    if (node->type != XML_ELEMENT_NODE) {
-      continue;
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
-      title = (gchar *) xmlNodeGetContent (node);
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "item") == 0) {
-      parse_item_element (node, submenu);
-    }
-  }
-
-  if (title == NULL) {
-    gdk_threads_enter ();
-    set_menu_item_italic (item, "No title");
-    gdk_threads_leave ();
-
-    g_critical ("<channel> element doesn't have <title> element.");
-  } else {
-    gdk_threads_enter ();
-    set_menu_item (item, title);
-    gdk_threads_leave ();
-  }
-}
-
-static void
-parse_rss_element (xmlNodePtr   root,
-                   GtkMenuItem *item,
-                   GtkMenu     *submenu)
-{
-  xmlNodePtr node;
-
-  g_assert (root != NULL);
-
-  for (node = root->children; node != NULL; node = node->next) {
-    if (node->type != XML_ELEMENT_NODE) {
-      continue;
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "channel") == 0) {
-      parse_channel_element (node, item, submenu);
-      return;
+      g_signal_connect (menu_item,
+                        "activate",
+                        G_CALLBACK(on_feed_open),
+                        g_strdup ((const gchar *) xmlNodeGetContent (node)));
     }
   }
 
   gdk_threads_enter ();
-  set_menu_item_italic (item, "Invalid RSS feed");
+  gtk_widget_show_all (menu_item);
+  gtk_menu_shell_append (GTK_MENU_SHELL(menu),
+                         menu_item);
   gdk_threads_leave ();
-
-  g_critical ("<channel> element not found.");
 }
 
 static void
-parse_doc (xmlDocPtr    doc,
-           GtkMenuItem *item,
-           GtkMenu     *submenu)
+parse_channel_element (xmlNodePtr  root,
+                       GtkWidget  *menu)
 {
   xmlNodePtr node;
+  g_assert (root != NULL);
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "item") == 0) {
+      parse_item_element (node, menu);
+    }
+  }
+}
 
-  g_assert (doc != NULL);
+static void
+parse_rss_element (xmlNodePtr  root,
+                   GtkWidget  *menu)
+{
+  xmlNodePtr node;
+  g_assert (root != NULL);
+  for (node = root->children; node != NULL; node = node->next) {
+    if (node->type != XML_ELEMENT_NODE) {
+      continue;
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "channel") == 0) {
+      parse_channel_element (node, menu);
+      return;
+    }
+  }
+}
+
+gpointer
+rss_feed_parser (RSSFeedParser *parser)
+{
+  xmlDocPtr  doc;
+  xmlNodePtr node;
+  
+  g_assert (parser != NULL);
+  g_assert (parser->feed_uri != NULL);
+  g_assert (parser->feed_menu != NULL);
+
+  doc = xmlReadFile (parser->feed_uri, NULL, 0);
+  if (doc == NULL) {
+    g_warning ("Failed to read %s", parser->feed_uri);
+    goto cleanup;
+  }
+
+  g_debug ("Reading %s", parser->feed_uri);
 
   for (node = xmlDocGetRootElement (doc); node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {
       continue;
     } else if (xmlStrcmp (node->name, (const xmlChar *) "rss") == 0) {
-      parse_rss_element (node, item, submenu);
-      return;
+      parse_rss_element (node, parser->feed_menu);
+      break;
     }
   }  
 
-  gdk_threads_enter ();
-  set_menu_item_italic (item, "Invalid RSS feed");
-  gdk_threads_leave ();
+  g_debug ("Done reading %s", parser->feed_uri);
 
-  g_critical ("<rssl> element not found.");
-}
-
-gpointer
-rss_feed_parser (gpointer data)
-{
-  RSSFeedParser *parser;
-  xmlDocPtr      doc;
-  
-  parser = (RSSFeedParser *) data;
-  g_assert (parser != NULL);
-  g_assert (parser->feed_uri != NULL);
-  g_assert (parser->item != NULL);
-  g_assert (parser->submenu != NULL);
-
-  g_debug ("Started reading %s", parser->feed_uri);
-  
-  /* Parse the XML file into DOM tree. */
-  doc = xmlReadFile (parser->feed_uri, NULL, 0);
-  if (doc == NULL) {
-    gdk_threads_enter ();
-    set_menu_item_italic (parser->item, "Invalid feed URL");
-    gdk_threads_leave ();
-
-    g_warning ("Couldn't read %s.", parser->feed_uri);
-    goto cleanup;
-  }
-
-  /* Process the DOM tree. */
-  parse_doc (doc, parser->item, parser->submenu);
-  g_debug ("Finished reading %s", parser->feed_uri);
-
-  /* Cleanup. */
  cleanup:
   xmlFreeDoc (doc);
   g_free (parser->feed_uri);

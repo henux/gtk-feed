@@ -100,6 +100,7 @@ show_subscribe_dialog ()
                          "has-separator", FALSE,
                          "border-width", 12,
                          "resizable", FALSE,
+                         "skip-taskbar-hint", TRUE,
                          NULL);
 
   gtk_dialog_add_buttons (GTK_DIALOG(dialog),
