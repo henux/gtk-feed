@@ -81,6 +81,9 @@ parse_feed_element (xmlNodePtr  root,
                             NULL);
 
       gtk_container_add (GTK_CONTAINER(menu_item), label);
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "tooltip") == 0) {
+      gtk_widget_set_tooltip_text (menu_item,
+                                   (const gchar *) xmlNodeGetContent (node));
     } else if (xmlStrcmp (node->name, (const xmlChar *) "icon-url") == 0) {
       /* TODO */
     } else if (xmlStrcmp (node->name, (const xmlChar *) "feed-url") == 0) {
@@ -101,6 +104,8 @@ parse_feed_element (xmlNodePtr  root,
       g_message ("Skipping unknown element <%s>", node->name);
     }
   }
+
+  gtk_widget_show_all (menu_item);
 }
 
 /* Parses the <feeds> element and it's child elements. */
@@ -132,6 +137,7 @@ get_feeds_menu ()
     gchar      *filename;
     xmlDocPtr   doc;
     xmlNodePtr  node;
+    gsize       feeds_found = FALSE;
 
     feeds_menu = gtk_menu_new ();
 
@@ -153,6 +159,7 @@ get_feeds_menu ()
         continue;
       } else if (xmlStrcmp (node->name, (const xmlChar *) "feeds") == 0) {
         parse_feeds_element (node, feeds_menu);
+        feeds_found = TRUE;
         break;
       } else {
         g_message ("Skippping unknown element <%s>", node->name);
@@ -160,6 +167,24 @@ get_feeds_menu ()
     }
 
   cleanup:
+    if (feeds_found == FALSE) {
+      GtkWidget *label;
+      GtkWidget *menu_item;
+
+      label = g_object_new (GTK_TYPE_LABEL,
+                            "text", "<span style='italic'>No feeds loaded</span>",
+                            "use-markup", TRUE,
+                            NULL);
+
+      menu_item = gtk_menu_item_new ();
+
+      gtk_container_add (GTK_CONTAINER(menu_item),
+                         label);
+
+      gtk_menu_shell_append (GTK_MENU_SHELL(feeds_menu),
+                             menu_item);
+    }
+
     g_debug ("Done reading %s", filename);
     xmlFreeDoc (doc);
     g_free (filename);
