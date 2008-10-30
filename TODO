@@ -1,20 +1,29 @@
 gtk-feed TODO
 
- - Internationalization.
- - Atom feed parser.
- - Easier way to sign up to feeds.
- - Manual page and user manual.
- - Ability to reload feeds file while gtk-feed is running or
-   automatic reloading when feeds file is modified.
- - Ability to organize feeds into subcategories.
- - Configuration to allow URLs be opened by other means than xdg-open.
- - Automatic reloading of feed URLs at regular time intervals.
- - Graphical preferences dialog.
- - Play a sound or displaying a notification when new unread feeds
-   are available.
- - Display unread feeds in the menu with bold typeface.
- - Number of unread feeds could be shown in the system tray icon's
-   tooltip.
- - Integration to Mozilla Firefox and other browser; feeds could be
-   signed up to gtk-feed from the browser interface.
- - Filtering out feed articles based on user defined criteria.
+ - Internationalization and localization.
+
+ - Atom and RSS/RDF feed support.
+
+ - User manual.
+
+ - User preferences dialog.
+
+ - Desktop menu item.
+
+ - Automatic startup.
+
+ - Feed reloading at regular time intervals.
+
+ - Notification when new feeds are available.
+
+ - Display unread feeds in bold typeface.
+
+ - Display number of unread feeds in tooltip.
+
+ - Feed filter based on user specified criterias.
+
+ - Change the icon based on program state:
+   1) loading feeds
+   2) normal
+   3) unread feeds
+   4) error

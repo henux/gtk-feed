@@ -84,9 +84,9 @@ parse_feed_element (xmlNodePtr  root,
     } else if (xmlStrcmp (node->name, (const xmlChar *) "tooltip") == 0) {
       gtk_widget_set_tooltip_text (menu_item,
                                    (const gchar *) xmlNodeGetContent (node));
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "icon-url") == 0) {
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "icon") == 0) {
       /* TODO */
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "feed-url") == 0) {
+    } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
       RSSFeedParser *parser;
 
       parser = g_new0 (RSSFeedParser, 1);
@@ -204,37 +204,70 @@ get_main_menu ()
   if (main_menu == NULL) {
     GtkWidget *item, *image;
 
+    /* Menu object. */
     main_menu = gtk_menu_new ();
 
-    image = gtk_image_new_from_icon_name ("gtk-feed",
-                                          GTK_ICON_SIZE_MENU);
-    
+    /* Subscribe menu item. */
+    image = g_object_new (GTK_TYPE_IMAGE,
+                          "stock", GTK_STOCK_ADD,
+                          "icon-size", GTK_ICON_SIZE_MENU,
+                          NULL);
+
     item = gtk_image_menu_item_new_with_mnemonic ("_Subscribe");
+
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item),
                                    image);
+
     gtk_menu_shell_append (GTK_MENU_SHELL(main_menu),
                            item);
+
     g_signal_connect (item,
                       "activate",
                       G_CALLBACK(on_main_subscribe),
                       NULL);
 
-    item = gtk_image_menu_item_new_from_stock (GTK_STOCK_ABOUT, NULL);
+    /* Feeds menu item. */
+    image = gtk_image_new_from_icon_name ("gtk-feed",
+                                          GTK_ICON_SIZE_MENU);
+
+    item = gtk_image_menu_item_new_with_mnemonic ("_Feeds");
+
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item),
+                                   image);
+
     gtk_menu_shell_append (GTK_MENU_SHELL(main_menu),
                            item);
+
+    g_signal_connect (item,
+                      "activate",
+                      G_CALLBACK(on_main_feeds),
+                      NULL);
+
+    /* About menu item. */
+    item = gtk_image_menu_item_new_from_stock (GTK_STOCK_ABOUT,
+                                               NULL);
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(main_menu),
+                           item);
+
     g_signal_connect (item,
                       "activate",
                       G_CALLBACK(on_main_about),
                       NULL);
 
-    item = gtk_image_menu_item_new_from_stock (GTK_STOCK_QUIT, NULL);
+    /* Quit menu item. */
+    item = gtk_image_menu_item_new_from_stock (GTK_STOCK_QUIT,
+                                               NULL);
+
     gtk_menu_shell_append (GTK_MENU_SHELL(main_menu),
                            item);
+
     g_signal_connect (item,
                       "activate",
                       G_CALLBACK(on_main_quit),
                       NULL);
 
+    /* Show the menu. */
     gtk_widget_show_all (main_menu);
   }
 

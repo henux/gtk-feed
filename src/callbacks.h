@@ -26,8 +26,9 @@ void on_icon_popup_menu (GtkStatusIcon *, guint, guint, gpointer);
 void on_feed_open (GtkMenuItem *, gpointer);
 
 /* Main menu callbacks */
-void on_main_about (GtkMenuItem *, gpointer);
 void on_main_subscribe (GtkMenuItem *, gpointer);
+void on_main_feeds (GtkMenuItem *, gpointer);
+void on_main_about (GtkMenuItem *, gpointer);
 void on_main_quit (GtkMenuItem *, gpointer);
 
 #endif

@@ -20,5 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void show_about_dialog ();
 void show_subscribe_dialog ();
+void show_feeds_dialog ();
 
 #endif

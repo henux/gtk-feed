@@ -89,8 +89,7 @@ void
 show_subscribe_dialog ()
 {
   GtkWidget
-    *dialog,
-    *content_area, *action_area, *table,
+    *dialog, *content_area, *table,
     *url_label, *url_entry,
     *title_label, *title_entry;
 
@@ -117,8 +116,6 @@ show_subscribe_dialog ()
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
   g_object_set (content_area, "spacing", 12, NULL);
-
-  action_area = gtk_dialog_get_action_area (GTK_DIALOG(dialog));
 
   /* Table layout. */
   table = g_object_new (GTK_TYPE_TABLE,
@@ -154,6 +151,101 @@ show_subscribe_dialog ()
   url_entry = g_object_new (GTK_TYPE_ENTRY, NULL);
 
   gtk_table_attach_defaults (GTK_TABLE(table), url_entry, 1, 2, 1, 2);
+
+  /* Show the dialog. */
+  gtk_widget_show_all (dialog);
+}
+
+/***** FEEDS DIALOG *****/
+
+/* Columns. */
+enum {
+  FEEDS_TITLE_COLUMN,
+  FEEDS_N_COLUMNS,
+};
+
+/* Feeds dialog response handler. */
+static void
+on_feeds_response (GtkDialog *dialog,
+                   gint       response_id,
+                   gpointer   user_data)
+{
+  /* TODO */
+}
+
+static GtkWidget *
+build_feeds_list ()
+{
+  GtkWidget         *feeds_view;
+  GtkListStore      *feeds_store;
+  GtkCellRenderer   *title_renderer;
+  GtkTreeViewColumn *title_column;
+  GtkTreeIter        iter;
+
+  feeds_store = gtk_list_store_new (FEEDS_N_COLUMNS,
+                                    G_TYPE_STRING);
+
+  gtk_list_store_append (feeds_store, &iter);
+  gtk_list_store_set (feeds_store, &iter, 0, "Foo", -1);
+
+  gtk_list_store_append (feeds_store, &iter);
+  gtk_list_store_set (feeds_store, &iter, 0, "Baz", -1);
+
+  feeds_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(feeds_store));
+  g_object_unref (feeds_store);
+
+  title_renderer = gtk_cell_renderer_text_new ();
+
+  title_column = gtk_tree_view_column_new_with_attributes ("Feed",
+                                                           title_renderer,
+                                                           "text",
+                                                           FEEDS_TITLE_COLUMN,
+                                                           NULL);
+
+  gtk_tree_view_append_column (GTK_TREE_VIEW(feeds_view), title_column);
+
+  return feeds_view;
+}
+
+/* Shows the feeds dialog. */
+void
+show_feeds_dialog ()
+{
+  GtkWidget *dialog, *content_area, *feeds_list;
+
+  /* Feeds dialog. */
+  dialog = g_object_new (GTK_TYPE_DIALOG,
+                         "title", "Feeds",
+                         "has-separator", FALSE,
+                         "border-width", 12,
+                         "resizable", FALSE,
+                         "skip-taskbar-hint", TRUE,
+                         "default-height", 400,
+                         NULL);
+
+  gtk_dialog_add_buttons (GTK_DIALOG(dialog),
+                          GTK_STOCK_ADD,
+                          0,
+                          GTK_STOCK_EDIT,
+                          0,
+                          GTK_STOCK_DELETE,
+                          0,
+                          GTK_STOCK_OK,
+                          GTK_RESPONSE_OK,
+                          NULL);
+
+  g_signal_connect (dialog,
+                    "response",
+                    G_CALLBACK(on_feeds_response),
+                    NULL);
+
+  content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
+  g_object_set (content_area, "spacing", 12, NULL);
+
+  /* Feeds list. */
+  feeds_list = build_feeds_list ();
+
+  gtk_box_pack_start (GTK_BOX(content_area), feeds_list, TRUE, TRUE, 0);
 
   /* Show the dialog. */
   gtk_widget_show_all (dialog);

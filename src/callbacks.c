@@ -71,16 +71,6 @@ on_feed_open (GtkMenuItem *item,
   open_url ((const gchar *) user_data, NULL);
 }
 
-/* The "About" main menu item handler.  ITEM is the menu item object and
-   USER_DATA is ignored.  This event handler shows the about dialog to the
-   user. */
-void
-on_main_about (GtkMenuItem *item,
-               gpointer     user_data)
-{
-  show_about_dialog ();
-}
-
 /* The "Subscribe" main menu item handler.  ITEM is the menu item object
    and USER_DATA is ignored.  This event handler shows the subscribe dialog
    to the user. */
@@ -89,6 +79,26 @@ on_main_subscribe (GtkMenuItem *item,
                    gpointer     user_data)
 {
   show_subscribe_dialog ();
+}
+
+/* The "Feeds" main menu item handler.  ITEM is the menu item object and
+   USER_DATA is ignored.  This event handler shows the feeds dialog to the
+   user. */
+void
+on_main_feeds (GtkMenuItem *item,
+               gpointer     user_data)
+{
+  show_feeds_dialog ();
+}
+
+/* The "About" main menu item handler.  ITEM is the menu item object and
+   USER_DATA is ignored.  This event handler shows the about dialog to the
+   user. */
+void
+on_main_about (GtkMenuItem *item,
+               gpointer     user_data)
+{
+  show_about_dialog ();
 }
 
 /* The "Quit" main menu item handler.  ITEM is the menu item object and

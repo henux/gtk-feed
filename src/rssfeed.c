@@ -38,6 +38,7 @@ parse_item_element (xmlNodePtr     root,
   g_assert (parser != NULL);
 
   menu_item = gtk_menu_item_new ();
+
   for (node = root->children; node != NULL; node = node->next) {
     if (node->type != XML_ELEMENT_NODE) {
       continue;
