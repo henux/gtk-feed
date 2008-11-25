@@ -4,7 +4,7 @@ gtk-feed TODO
 
  - Atom and RSS/RDF feed support.
 
- - User manual.
+ - User manual and documentation.
 
  - User preferences dialog.
 
@@ -18,12 +18,18 @@ gtk-feed TODO
 
  - Display unread feeds in bold typeface.
 
- - Display number of unread feeds in tooltip.
+ - Display number of unread feeds in a tooltip of the system tray icon.
 
  - Feed filter based on user specified criterias.
 
- - Change the icon based on program state:
+ - Easier way of subscribing into feeds; the user should be able to just
+   give an URL to the HTML page containing feeds, rather than giving
+   URL to the XML feed itself.
+
+ - Displaying a 'favicon.ico' icon for each feed in the feeds menu.
+
+ - Change the system tray icon based on program state:
    1) loading feeds
    2) normal
-   3) unread feeds
+   3) new feeds available
    4) error

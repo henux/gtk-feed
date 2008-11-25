@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtk/gtk.h>
 
-#include "dialogs.h"
 #include "common.h"
+#include "dialogs.h"
+#include "feeds.h"
 
 /***** ABOUT DIALOG *****/
 
@@ -180,29 +181,37 @@ build_feeds_list ()
   GtkListStore      *feeds_store;
   GtkCellRenderer   *title_renderer;
   GtkTreeViewColumn *title_column;
+  GList             *ptr;
   GtkTreeIter        iter;
 
   feeds_store = gtk_list_store_new (FEEDS_N_COLUMNS,
                                     G_TYPE_STRING);
 
-  gtk_list_store_append (feeds_store, &iter);
-  gtk_list_store_set (feeds_store, &iter, 0, "Foo", -1);
-
-  gtk_list_store_append (feeds_store, &iter);
-  gtk_list_store_set (feeds_store, &iter, 0, "Baz", -1);
+  for (ptr = g_list_first (feeds);
+       ptr!= NULL;
+       ptr = g_list_next (ptr)) {
+    gtk_list_store_append (feeds_store, &iter);
+    gtk_list_store_set (feeds_store,
+                        &iter,
+                        0,
+                        ((Feed*)ptr->data)->title,
+                        -1);
+  }
 
   feeds_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(feeds_store));
   g_object_unref (feeds_store);
 
   title_renderer = gtk_cell_renderer_text_new ();
 
-  title_column = gtk_tree_view_column_new_with_attributes ("Feed",
-                                                           title_renderer,
-                                                           "text",
-                                                           FEEDS_TITLE_COLUMN,
-                                                           NULL);
+  title_column =
+    gtk_tree_view_column_new_with_attributes ("Feed",
+                                              title_renderer,
+                                              "text",
+                                              FEEDS_TITLE_COLUMN,
+                                              NULL);
 
-  gtk_tree_view_append_column (GTK_TREE_VIEW(feeds_view), title_column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(feeds_view),
+                               title_column);
 
   return feeds_view;
 }
@@ -225,8 +234,6 @@ show_feeds_dialog ()
 
   gtk_dialog_add_buttons (GTK_DIALOG(dialog),
                           GTK_STOCK_ADD,
-                          0,
-                          GTK_STOCK_EDIT,
                           0,
                           GTK_STOCK_DELETE,
                           0,

@@ -19,26 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RSSFEED_H
 
 /*
- * RSS Feed Parser:
- * 
- * The RSS feed parser works in a background thread.  Each RSS feed is read
- * by it's own thread; thus there will be an equal amount of parser threads
- * as there are feeds to read.
- * 
- * Each parser run gets an URL to the location the web feed and a sub-menu
- * object to build feed articles into.
- * 
- * Once the whole feed is read and processed, the background thread
- * frees all necessary resources and exists cleanly.
+ * RSS 0.91 Feed Parser.
  */
 
 typedef struct {
-  gchar     *feed_uri;
-  GtkWidget *feed_menu;
-
-  /* private */
-  GtkWidget *loading;
-  gint       next_pos;
+  GtkMenu     *menu;
+  const gchar *source;
 } RSSFeedParser;
 
 gpointer rss_feed_parser (RSSFeedParser *parser);

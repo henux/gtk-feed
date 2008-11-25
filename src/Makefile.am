@@ -20,13 +20,13 @@ bin_PROGRAMS = gtk-feed
 gtk_feed_SOURCES = \
 	callbacks.c \
 	callbacks.h \
+	feeds.c \
+	feeds.h \
 	common.c \
 	common.h \
 	dialogs.c \
 	dialogs.h \
 	main.c \
-	options.c \
-	options.h \
 	rssfeed.c \
 	rssfeed.h
 

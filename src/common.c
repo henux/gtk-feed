@@ -19,14 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #endif
 
-#include <glib/gthread.h>
 #include <gtk/gtk.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 
 #include "callbacks.h"
 #include "common.h"
-#include "rssfeed.h"
 
 /* Creates the singleton status icon object.  Subsequent calls will return
    the same status icon object. */
@@ -52,80 +48,6 @@ get_status_icon ()
   return status_icon;
 }
 
-/* Parses the <feed> element and it's child elements. */
-static void
-parse_feed_element (xmlNodePtr  root,
-                    GtkWidget  *menu)
-{
-  xmlNodePtr  node;
-  GtkWidget  *menu_item;
-
-  g_assert (root != NULL);
-
-  menu_item = gtk_menu_item_new ();
-  gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
-
-  for (node = root->children; node != NULL; node = node->next) {
-    if (node->type != XML_ELEMENT_NODE) {
-      continue;
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "title") == 0) {
-      gchar     *title;
-      GtkWidget *label;
-
-      title = (gchar *) xmlNodeGetContent (node);
-      g_strstrip (title);
-
-      label = g_object_new (GTK_TYPE_LABEL,
-                            "label", title,
-                            "xalign", 0.0f,
-                            NULL);
-
-      gtk_container_add (GTK_CONTAINER(menu_item), label);
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "tooltip") == 0) {
-      gtk_widget_set_tooltip_text (menu_item,
-                                   (const gchar *) xmlNodeGetContent (node));
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "icon") == 0) {
-      /* TODO */
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "link") == 0) {
-      RSSFeedParser *parser;
-
-      parser = g_new0 (RSSFeedParser, 1);
-      parser->feed_uri = g_strdup ((const gchar *) xmlNodeGetContent (node));
-      parser->feed_menu = gtk_menu_new ();
-
-      gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_item),
-                                 parser->feed_menu);
-
-      if (g_thread_create ((GThreadFunc) rss_feed_parser, parser, FALSE, NULL) == NULL) {
-        g_critical ("Failed to create parser thread for %s", parser->feed_uri);
-        g_free (parser);
-      }
-    } else {
-      g_message ("Skipping unknown element <%s>", node->name);
-    }
-  }
-
-  gtk_widget_show_all (menu_item);
-}
-
-/* Parses the <feeds> element and it's child elements. */
-static void
-parse_feeds_element (xmlNodePtr  root,
-                     GtkWidget  *menu)
-{
-  xmlNodePtr   node;
-  g_assert (root != NULL);
-  for (node = root->children; node != NULL; node = node->next) {
-    if (node->type != XML_ELEMENT_NODE) {
-      continue;
-    } else if (xmlStrcmp (node->name, (const xmlChar *) "feed") == 0) {
-      parse_feed_element (node, menu);
-    } else {
-      g_message ("Skipping unknown element <%s>", node->name);
-    }
-  }
-}
-
 /* Creates the singleton feeds menu object.  Subsequent calls will return
    the same menu object. */
 GtkWidget *
@@ -134,60 +56,9 @@ get_feeds_menu ()
   static GtkWidget *feeds_menu = NULL;
 
   if (feeds_menu == NULL) {
-    gchar      *filename;
-    xmlDocPtr   doc;
-    xmlNodePtr  node;
-    gsize       feeds_found = FALSE;
-
+    /* Simply creates the singleton menu object for the feeds menu;
+       loading of feeds is done elsewhere. */
     feeds_menu = gtk_menu_new ();
-
-    filename = g_build_filename (g_get_user_config_dir (),
-                                 PACKAGE,
-                                 "feeds.xml",
-                                 NULL);
-
-    doc = xmlReadFile (filename, NULL, 0);
-    if (doc == NULL) {
-      g_critical ("Failed to read %s", filename);
-      goto cleanup;
-    }
-
-    g_debug ("Reading %s", filename);
-    
-    for (node = xmlDocGetRootElement (doc); node != NULL; node = node->next) {
-      if (node->type != XML_ELEMENT_NODE) {
-        continue;
-      } else if (xmlStrcmp (node->name, (const xmlChar *) "feeds") == 0) {
-        parse_feeds_element (node, feeds_menu);
-        feeds_found = TRUE;
-        break;
-      } else {
-        g_message ("Skippping unknown element <%s>", node->name);
-      }
-    }
-
-  cleanup:
-    if (feeds_found == FALSE) {
-      GtkWidget *label;
-      GtkWidget *menu_item;
-
-      label = g_object_new (GTK_TYPE_LABEL,
-                            "text", "<span style='italic'>No feeds loaded</span>",
-                            "use-markup", TRUE,
-                            NULL);
-
-      menu_item = gtk_menu_item_new ();
-
-      gtk_container_add (GTK_CONTAINER(menu_item),
-                         label);
-
-      gtk_menu_shell_append (GTK_MENU_SHELL(feeds_menu),
-                             menu_item);
-    }
-
-    g_debug ("Done reading %s", filename);
-    xmlFreeDoc (doc);
-    g_free (filename);
     gtk_widget_show_all (feeds_menu);
   }
   

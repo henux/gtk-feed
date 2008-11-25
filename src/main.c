@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtk/gtk.h>
 #include "common.h"
+#include "feeds.h"
 
 /* Program main function. */
 int
@@ -34,7 +35,7 @@ main (int argc, char **argv)
   /* Initialize the application. */
   g_set_application_name ("GTK Feed Reader");
   gtk_window_set_default_icon_name ("gtk-feed");
-  get_feeds_menu ();
+  load_feeds ();
   get_status_icon ();
 
   /* Run the main loop. */
