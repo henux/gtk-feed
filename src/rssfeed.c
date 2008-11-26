@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static void
 parse_item_element (xmlNodePtr  root,
-                    GtkMenu    *menu)
+                    GtkWidget  *menu)
 {
   xmlNodePtr  node;
   GtkWidget  *item;
@@ -64,14 +64,14 @@ parse_item_element (xmlNodePtr  root,
   }
 
   gdk_threads_enter ();
-  gtk_widget_show_all (item);
   gtk_menu_shell_append (GTK_MENU_SHELL(menu), item);
+  gtk_widget_show_all (item);
   gdk_threads_leave ();
 }
 
 static void
 parse_channel_element (xmlNodePtr  root,
-                       GtkMenu    *menu)
+                       GtkWidget  *menu)
 {
   xmlNodePtr node;
   g_assert (root != NULL);
@@ -85,7 +85,7 @@ parse_channel_element (xmlNodePtr  root,
 
 static void
 parse_rss_element (xmlNodePtr  root,
-                   GtkMenu    *menu)
+                   GtkWidget  *menu)
 {
   xmlNodePtr node;
   g_assert (root != NULL);
@@ -101,13 +101,18 @@ parse_rss_element (xmlNodePtr  root,
 gpointer
 rss_feed_parser (RSSFeedParser *parser)
 {
-  xmlDocPtr  doc;
-  xmlNodePtr node;
+  xmlDocPtr   doc;
+  xmlNodePtr  node;
+  GtkWidget  *menu;
 
   g_assert (parser != NULL);
   g_assert (parser->menu != NULL);
   g_assert (parser->source != NULL);
 
+  menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM(parser->menu),
+                             menu);
+  
   doc = xmlReadFile (parser->source, NULL, 0);
   if (doc == NULL) {
     g_warning ("Failed to read %s", parser->source);
@@ -120,7 +125,7 @@ rss_feed_parser (RSSFeedParser *parser)
        node!= NULL;
        node = node->next) {
     if (xmlStrcmp (node->name, (const xmlChar *) "rss") == 0) {
-      parse_rss_element (node, parser->menu);
+      parse_rss_element (node, menu);
       break;
     }
   }  

@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 typedef struct {
-  GtkMenu     *menu;
+  GtkWidget   *menu;
   const gchar *source;
 } RSSFeedParser;
 

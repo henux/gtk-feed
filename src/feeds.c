@@ -34,13 +34,11 @@ parse_feed_element (xmlNodePtr root)
 {
   xmlNodePtr  node;
   Feed       *feed;
-  GtkWidget  *item;
 
   g_assert (root != NULL);
 
   feed = g_new0 (Feed, 1);
   feed->dirty = TRUE;
-  feed->menu = GTK_MENU(gtk_menu_new ());
 
   for (node = root->children;
        node!= NULL;
@@ -52,12 +50,10 @@ parse_feed_element (xmlNodePtr root)
     }
   }
 
-  item = gtk_menu_item_new_with_label (feed->title);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM(item),
-                             GTK_WIDGET(feed->menu));
+  feed->menu = gtk_menu_item_new_with_label (feed->title);
   gtk_menu_shell_append (GTK_MENU_SHELL(get_feeds_menu ()),
-                         item);
-  gtk_widget_show_all (item);
+                         feed->menu);
+  gtk_widget_show_all (feed->menu);
   feeds = g_list_append (feeds, feed);
 }
 
@@ -131,8 +127,12 @@ sync_feeds ()
       parser = g_new (RSSFeedParser, 1);
       parser->menu = ((Feed*)ptr->data)->menu;
       parser->source = ((Feed*)ptr->data)->source;
-      g_thread_create ((GThreadFunc) rss_feed_parser, parser, FALSE, NULL);
       ((Feed*)ptr->data)->dirty = FALSE;
+      if (g_thread_create ((GThreadFunc) rss_feed_parser,
+                           parser, FALSE, NULL) == NULL) {
+        g_critical ("Failed to create parse thread for %s", parser->source);
+        g_free (parser);
+      }
     }
   }
 }

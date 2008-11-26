@@ -25,6 +25,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "dialogs.h"
 #include "feeds.h"
 
+/* Closure notify callback to destroy the dialog data structure. */
+static void
+destroy_data (gpointer *data,
+              GClosure *closure)
+{
+  g_free (data);
+}
+
 /***** ABOUT DIALOG *****/
 
 /* List of authors.  */
@@ -76,25 +84,55 @@ show_about_dialog ()
 
 /***** SUBSCRIBE DIALOG *****/
 
+/* Subscribe dialog data structure. */
+typedef struct {
+  GtkEntry *title;
+  GtkEntry *source;
+} SubscribeDialog;
+
 /* Subscibe dialog response handler. */
 static void
-on_subscribe_response (GtkDialog *dialog,
-                       gint       response_id,
-                       gpointer   user_data)
+on_subscribe_response (GtkDialog       *dialog,
+                       gint             response_id,
+                       SubscribeDialog *data)
 {
-  /* TODO */
+  g_assert (dialog != NULL);
+  g_assert (data != NULL);
+  g_assert (data->title != NULL);
+  g_assert (data->source != NULL);
+
+  if (response_id == GTK_RESPONSE_OK) {
+    Feed      *feed;
+
+    feed = g_new (Feed, 1);
+
+    feed->title  = g_strdup (gtk_entry_get_text (data->title));
+    feed->source = g_strdup (gtk_entry_get_text (data->source));
+    feed->dirty  = TRUE;
+    feed->menu   = gtk_menu_item_new_with_label (feed->title);
+
+    gtk_widget_show_all (feed->menu);
+
+    feeds = g_list_append (feeds, feed);
+    sync_feeds ();
+  }
+
+  gtk_widget_destroy (GTK_WIDGET(dialog));
 }
 
 /* Shows the subscribe dialog. */
 void
 show_subscribe_dialog ()
 {
-  GtkWidget
-    *dialog, *content_area, *table,
-    *url_label, *url_entry,
-    *title_label, *title_entry;
+  SubscribeDialog *data;
+  GtkWidget       *dialog;
+  GtkWidget       *content;
+  GtkWidget       *table;
+  GtkWidget       *label;    
 
   /* Subscribe dialog. */
+  data = g_new0 (SubscribeDialog, 1);
+
   dialog = g_object_new (GTK_TYPE_DIALOG,
                          "title", "Subscribe",
                          "has-separator", FALSE,
@@ -109,14 +147,16 @@ show_subscribe_dialog ()
                           GTK_STOCK_OK,
                           GTK_RESPONSE_OK,
                           NULL);
-    
-  g_signal_connect (dialog,
-                    "response",
-                    G_CALLBACK(on_subscribe_response),
-                    NULL);
 
-  content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
-  g_object_set (content_area, "spacing", 12, NULL);
+  g_signal_connect_data (dialog,
+                         "response",
+                         G_CALLBACK(on_subscribe_response),
+                         data,
+                         (GClosureNotify) destroy_data,
+                         0);
+
+  content = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
+  g_object_set (content, "spacing", 12, NULL);
 
   /* Table layout. */
   table = g_object_new (GTK_TYPE_TABLE,
@@ -124,34 +164,29 @@ show_subscribe_dialog ()
                         "n-rows", 2,
                         "column-spacing", 12,
                         NULL);
-
-  gtk_box_pack_start (GTK_BOX(content_area), table, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX(content), table, TRUE, TRUE, 0);
   
   /* Title label. */
-  title_label = g_object_new (GTK_TYPE_LABEL,
-                              "label", "Title:",
-                              "xalign", 0.0f,
-                              NULL);
-
-  gtk_table_attach_defaults (GTK_TABLE(table), title_label, 0, 1, 0, 1);
+  label = g_object_new (GTK_TYPE_LABEL,
+                        "label", "Title:",
+                        "xalign", 0.0f,
+                        NULL);
+  gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 0, 1);
 
   /* Title entry. */
-  title_entry = g_object_new (GTK_TYPE_ENTRY, NULL);
+  data->title = GTK_ENTRY(g_object_new (GTK_TYPE_ENTRY, NULL));
+  gtk_table_attach_defaults (GTK_TABLE(table), GTK_WIDGET(data->title), 1, 2, 0, 1);
 
-  gtk_table_attach_defaults (GTK_TABLE(table), title_entry, 1, 2, 0, 1);
+  /* Source label. */
+  label = g_object_new (GTK_TYPE_LABEL,
+                        "label", "Source:",
+                        "xalign", 0.0f,
+                        NULL);
+  gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 1, 2);
 
-  /* Location label. */
-  url_label = g_object_new (GTK_TYPE_LABEL,
-                            "label", "Location:",
-                            "xalign", 0.0f,
-                            NULL);
-
-  gtk_table_attach_defaults (GTK_TABLE(table), url_label, 0, 1, 1, 2);
-
-  /* Location entry. */
-  url_entry = g_object_new (GTK_TYPE_ENTRY, NULL);
-
-  gtk_table_attach_defaults (GTK_TABLE(table), url_entry, 1, 2, 1, 2);
+  /* Source entry. */
+  data->source = GTK_ENTRY(g_object_new (GTK_TYPE_ENTRY, NULL));
+  gtk_table_attach_defaults (GTK_TABLE(table), GTK_WIDGET(data->source), 1, 2, 1, 2);
 
   /* Show the dialog. */
   gtk_widget_show_all (dialog);
@@ -159,21 +194,58 @@ show_subscribe_dialog ()
 
 /***** FEEDS DIALOG *****/
 
+/* Feeds dialog data structure. */
+typedef struct {
+  GtkTreeView      *feeds;
+  GtkTreeSelection *selection;
+} FeedsDialog;
+
 /* Columns. */
 enum {
+  FEEDS_PTR_COLUMN,
   FEEDS_TITLE_COLUMN,
   FEEDS_N_COLUMNS,
 };
 
 /* Feeds dialog response handler. */
 static void
-on_feeds_response (GtkDialog *dialog,
-                   gint       response_id,
-                   gpointer   user_data)
+on_feeds_response (GtkDialog   *dialog,
+                   gint         response_id,
+                   FeedsDialog *data)
 {
-  /* TODO */
+  g_assert (dialog != NULL);
+  g_assert (data != NULL);
+  g_assert (data->feeds != NULL);
+  g_assert (data->selection != NULL);
+
+  if (response_id == GTK_RESPONSE_OK) {
+    /* The "Ok" button was pressed or the dialog otherwise closed. */
+    gtk_widget_destroy (GTK_WIDGET(dialog));
+  } else if (response_id == GTK_RESPONSE_YES) {
+    /* The "Add" button was pressed. */
+    show_subscribe_dialog ();
+  } else if (response_id == GTK_RESPONSE_NO) {
+    /* The "Delete" button was pressed. */
+    GtkTreeModel *model;
+    GtkTreeIter   iter;
+
+    if (gtk_tree_selection_get_selected (data->selection, &model, &iter)) {
+      Feed *feed;
+
+      gtk_tree_model_get (model, &iter, 0, (gpointer) &feed, -1);
+      g_assert (feed != NULL);
+      gtk_list_store_remove (GTK_LIST_STORE(model), &iter);
+      feeds = g_list_remove (feeds, feed);
+
+      gtk_widget_destroy (GTK_WIDGET(feed->menu));
+      g_free (feed->title);
+      g_free (feed->source);
+      g_free (feed);
+    }
+  }
 }
 
+/* Populate the feeds list. */
 static GtkWidget *
 build_feeds_list ()
 {
@@ -184,8 +256,10 @@ build_feeds_list ()
   GList             *ptr;
   GtkTreeIter        iter;
 
-  feeds_store = gtk_list_store_new (FEEDS_N_COLUMNS,
-                                    G_TYPE_STRING);
+  feeds_store =
+    gtk_list_store_new (FEEDS_N_COLUMNS,
+                        G_TYPE_POINTER,
+                        G_TYPE_STRING);
 
   for (ptr = g_list_first (feeds);
        ptr!= NULL;
@@ -193,8 +267,8 @@ build_feeds_list ()
     gtk_list_store_append (feeds_store, &iter);
     gtk_list_store_set (feeds_store,
                         &iter,
-                        0,
-                        ((Feed*)ptr->data)->title,
+                        0, ptr->data, 
+                        1, ((Feed*)ptr->data)->title,
                         -1);
   }
 
@@ -220,39 +294,47 @@ build_feeds_list ()
 void
 show_feeds_dialog ()
 {
-  GtkWidget *dialog, *content_area, *feeds_list;
+  FeedsDialog *data;
+  GtkWidget   *dialog;
+  GtkWidget   *content;
 
   /* Feeds dialog. */
+  data = g_new0 (FeedsDialog, 1);
+
   dialog = g_object_new (GTK_TYPE_DIALOG,
                          "title", "Feeds",
                          "has-separator", FALSE,
                          "border-width", 12,
-                         "resizable", FALSE,
                          "skip-taskbar-hint", TRUE,
-                         "default-height", 400,
+                         "default-width", 300,
+                         "default-height", 300,
                          NULL);
 
   gtk_dialog_add_buttons (GTK_DIALOG(dialog),
-                          GTK_STOCK_ADD,
-                          0,
-                          GTK_STOCK_DELETE,
-                          0,
-                          GTK_STOCK_OK,
-                          GTK_RESPONSE_OK,
+                          GTK_STOCK_ADD, GTK_RESPONSE_YES,
+                          GTK_STOCK_DELETE, GTK_RESPONSE_NO,
+                          GTK_STOCK_OK, GTK_RESPONSE_OK,
                           NULL);
 
-  g_signal_connect (dialog,
-                    "response",
-                    G_CALLBACK(on_feeds_response),
-                    NULL);
+  g_signal_connect_data (dialog,
+                         "response",
+                         G_CALLBACK(on_feeds_response),
+                         data,
+                         (GClosureNotify) destroy_data,
+                         0);
 
-  content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
-  g_object_set (content_area, "spacing", 12, NULL);
+  content = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
+  g_object_set (content, "spacing", 12, NULL);
 
   /* Feeds list. */
-  feeds_list = build_feeds_list ();
+  data->feeds = GTK_TREE_VIEW(build_feeds_list ());
+  data->selection = gtk_tree_view_get_selection (data->feeds);
 
-  gtk_box_pack_start (GTK_BOX(content_area), feeds_list, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX(content),
+                      GTK_WIDGET(data->feeds),
+                      TRUE,
+                      TRUE,
+                      0);
 
   /* Show the dialog. */
   gtk_widget_show_all (dialog);

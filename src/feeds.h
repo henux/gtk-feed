@@ -35,10 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Web feed structure.
  */
 typedef struct {
-  gchar    *title;      /* feed's title */
-  gchar    *source;     /* feed's URL */
-  gboolean  dirty;      /* if TRUE, the feed needs resynching */
-  GtkMenu  *menu;       /* feed's submenu */
+  gchar     *title;     /* feed's title */
+  gchar     *source;    /* feed's URL */
+  gboolean   dirty;     /* if TRUE, the feed needs resynching */
+  GtkWidget *menu;      /* feed's menu item */
 } Feed;
 
 /*
