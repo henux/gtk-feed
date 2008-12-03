@@ -17,4 +17,4 @@
 
 SUBDIRS = data src
 
-EXTRA_DIST = README
+EXTRA_DIST = README feeds.xml.dist

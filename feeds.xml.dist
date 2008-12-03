@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf8"?>
+<feeds>
+  <feed>
+    <title>GNU News</title>
+    <source>http://www.gnu.org/rss/whatsnew.rss</source>
+  </feed>
+  <!--
+  <feed>
+    <title>Arch Linux News</title>
+    <source>http://www.archlinux.org/feeds/news/</source>
+  </feed>
+  -->
+  <!--
+  <feed>
+    <title>Arch Linux Packages</title>
+    <source>http://www.archlinux.org/feeds/packages/</source>
+  </feed>
+  -->
+</feeds>

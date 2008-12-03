@@ -2,29 +2,32 @@ gtk-feed README
 
 Copyright (C) 2008 Henri Häkkinen
 
-gtk-feed is a lightweight and minimal GTK+ 2.0 RSS feed reader.  It works
-only as an icon on the window manager's system tray and provides feeds
-through a popup menu. The project is very early on it's development and
-much needs to be done.  The current version contains only a basic RSS feed
-support and not much else.
+gtk-feed is a lightweight and minimal GTK feed reader.  It works only as an
+icon on the window manager's system tray and provides feeds through a popup
+menu.  The project is very early on it's development and much needs to be
+done.  The current version supports only RSS 0.91 feeds.
 
-The program reads the `feeds' file from your `$XDG_CONFIG_HOME/gtk-feed'
-directory (which usually corresponds to `~/.config/gtk-feed').  This file
-should contain URLs to XML RSS feed resources, one URL on each line.  Blank
-lines and lines beginning with '#' are ignored.  For example to sign up to
-a news feed for the GNU Project, add this to your feeds file:
+Once started, the program displays an icon on the window manager's system
+tray.  You can access the feeds menu by left-clicking on this icon, and the
+application menu is accessed by right-clicking.  To subscribe to a new
+feed, select "Subscribe" from this menu and enter the URL of the feed.  For
+example to subscribe to the GNU Project web feed, use this URL:
 
     http://www.gnu.org/rss/whatsnew.rss
 
-At this moment, there is no easier way to do this other than to manually
-scramble through feed URLs :/
+Web sites syndicate their feeds by using the <link> HTML tag in the <head>
+section of the page.  At the moment unfortunately, you will need to find
+the web feed URL by yourself by manually inspecting the HTML source code.
+This will change into a more user-friendly manner in the next version of
+gtk-feed.
 
-Feed articles are accessible from the system tray icon's left click popup
-menu.  Clicking on a feed article opens the URL using your web browser.
-This is done by using the `xdg-open' utility so you will need to have that
-installed on your system.
+Configured feeds are stored in the file $XDG_CONFIG_HOME/gtk-feed/feeds.xml
+(which usually corresponds to $HOME/.config/gtk-feed/feeds.xml) in an XML
+document.  You can take a look at the feeds.xml.dist file distributed with
+the gtk-feed source package, which contains web feeds for some of well known
+sites :)
 
-Thanks for Jani Mettovaara for giving me the idea for this project.
+Thanks to Jani Mettovaara for giving me the idea for this project.
 
 The feed icon images distributed along with this project are taken from
 http://feedicons.com and they are released as "public domain".

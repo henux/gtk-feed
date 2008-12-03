@@ -40,6 +40,7 @@ main (int argc, char **argv)
 
   /* Run the main loop. */
   gtk_main ();
+  save_feeds ();
 
   return 0;
 }

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlsave.h>
 
 #include "common.h"
 #include "feeds.h"
@@ -112,7 +113,53 @@ load_feeds ()
 void
 save_feeds ()
 {
-  /* TODO */
+  xmlDocPtr       doc;
+  xmlNodePtr      root;
+  GList          *ptr;
+  gchar          *filename;
+  xmlSaveCtxtPtr  ctxt;
+
+  filename = g_build_filename (g_get_user_config_dir (),
+                               PACKAGE,
+                               "feeds.xml",
+                               NULL);
+  g_assert (filename != NULL);
+
+  g_debug ("Writing %s", filename);
+  
+  doc = xmlNewDoc ((const xmlChar*) "1.0");
+  g_assert (doc != NULL);
+
+  root = xmlNewNode (NULL, (const xmlChar *) "feeds");
+  g_assert (root != NULL);
+
+  xmlDocSetRootElement (doc, root);
+
+  for (ptr = g_list_first (feeds);
+       ptr!= NULL;
+       ptr = g_list_next (ptr)) {
+    xmlNodePtr node;
+
+    node = xmlNewNode (NULL, (const xmlChar *) "feed");
+    g_assert (node != NULL);
+
+    xmlNewChild (node, NULL, (const xmlChar *) "title",
+                 (const xmlChar *) ((Feed *)ptr->data)->title);
+
+    xmlNewChild (node, NULL, (const xmlChar *) "source",
+                 (const xmlChar *) ((Feed *)ptr->data)->source);
+
+    xmlAddChild (root, node);
+  }
+
+  ctxt = xmlSaveToFilename (filename, NULL, XML_SAVE_FORMAT);
+  g_assert (ctxt != NULL);
+
+  xmlSaveDoc (ctxt, doc);
+  xmlSaveClose (ctxt);
+
+  g_free (filename);
+  xmlFreeDoc (doc);
 }
 
 void

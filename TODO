@@ -28,6 +28,8 @@ gtk-feed TODO
 
  - Displaying a 'favicon.ico' icon for each feed in the feeds menu.
 
+ - Dialogs could be rewritten to use Glade.
+
  - Change the system tray icon based on program state:
    1) loading feeds
    2) normal

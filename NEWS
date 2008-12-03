@@ -1,4 +1,12 @@
 
+gtk-feed 0.2.0
+==============
+
+New features
+
+    * Basic graphical interface for adding and removing feeds.
+
+
 gtk-feed 0.1.2
 ==============
 
